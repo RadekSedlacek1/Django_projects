@@ -1,0 +1,60 @@
+/* base css for project main */
+
+body {
+    background-color: #212529;
+    color: white;
+}
+
+nav.navbar {
+    position: fixed;        /* Pevná pozice */
+    padding: 10px 10px;
+    top: 0;                 /* Přilepené k hornímu okraji */
+    width: 65vw;             /* Šířka navigace */
+    left: 50%;              /* Posunutí do středu */
+    transform: translateX(-50%); /* Vycentrování */
+    z-index: 1001;          /* Ujistí se, že je nad ostatním obsahem */
+    background: #333;       /* Barva pozadí */
+    color: white;
+    display: flex;
+    justify-content: center; /* Zarovnání obsahu na střed */
+    align-items: center;    /* Zarovnání vertikálně */
+}
+
+li.nav-item {
+    margin: 0px 5px;
+}
+
+span.navbar-text {
+    color: white;
+    font-size: 14px;  /* Nastaví velikost písma na 14px */
+    font-weight: bold; /* Nastaví tučné písmo */
+}
+
+div.h1_title {
+    color: #171717;
+    background-color: #a2a2a8;
+    padding: 5px;
+    position: absolute;        /* Umožní přesné umístění */
+    top: 80px;                 /* Odsazení od horního okraje */
+    left: 50%;                 /* Posunutí do středu */
+    transform: translateX(-50%);/* Vycentrování */
+    width: 60vw;                /* Roztáhne se na šířku */
+    z-index: 999;              /* Ujistí se, že je nad ostatním obsahem */
+    display: flex;
+    justify-content: center;   /* Zarovnání textu na střed */
+    align-items: center;       /* Vertikální zarovnání */
+    border-radius: 5px;
+}
+
+div.container {
+    margin: 100px 0px;
+    padding: 0px;
+    position: absolute;        /* Umožní přesné umístění */
+    top: 80px;                 /* Odsazení od horního okraje */
+    left: 50%;                 /* Posunutí do středu */
+    transform: translateX(-50%);/* Vycentrování */
+    width: 60vw;                /* Roztáhne se na šířku */
+    flex-direction: column;
+    justify-content: center;   /* Zarovnání textu na střed */
+    align-items: center;       /* Vertikální zarovnání */
+}

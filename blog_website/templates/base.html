@@ -1,0 +1,86 @@
+{% comment %} base html for project main {% endcomment %}
+
+{% load static %}
+
+{% load crispy_forms_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'styles/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/base.css' %}">
+
+    {% block css_files %}
+    {% endblock css_files %}
+
+    <title>
+        {% block title %}
+            Blog {% comment %} default title {% endcomment %}
+        {% endblock title %}
+    </title>
+
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <div>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <form method="post" action="{% url 'index' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">Home</button>
+                        </form>
+                    </li>
+                    <li class="nav-item">
+                        <form method="post" action="{% url 'create_post' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">Post</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                    <span class="navbar-text">Logged in as {{ user.username }} |</span>
+                    <li class="nav-item">
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">Logout</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <form method="post" action="{% url 'login' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">Login</button>
+                        </form>
+                    </li>
+                {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class= "h1_title">
+        <h1>
+            {% block page_title %}
+            {% endblock page_title %}
+        </h1>
+    </div>
+
+
+    <div class="container">
+        {% block content %}
+
+        {% endblock content %}
+    </div>
+
+
+    <script src="{% static 'scripts/bootstrap.bundle.min.js' %}"></script>
+
+</body>
+</html>

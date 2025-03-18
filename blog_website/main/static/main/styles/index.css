@@ -1,0 +1,23 @@
+/* index css for application main */
+
+.posts-container {
+    max-height: 500px; /* Výška boxu */
+    overflow-y: auto; /* Povolení posuvníku jen na výšku */
+    border: 1px solid #ccc; /* Volitelný rámeček */
+    padding: 10px;
+    background-color: #f8f9fa; /* Jemné pozadí pro lepší čitelnost */
+}
+
+
+div.card {
+    margin: 10px 0px;
+    width: 100%;            /* Roztáhne se na celou šířku */
+    text-align: justify;
+
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between; /* Rozmístí prvky rovnoměrně */
+    align-items: center; /* Zarovná prvky vertikálně */
+}

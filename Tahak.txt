@@ -1,0 +1,91 @@
+
+ 1. mkdir složka_s_projektem		
+ 			- založí složku na projekt
+
+ 2. cd / složka_s_projektem			
+ 			- jdi do složky s projektem
+
+ 3. python -m venv .env 			
+ 			- založení virtuálního prostředi
+
+ 4. .env\Sctipts\activate 			
+ 			- aktivace virtuálního prostředí
+
+ 5. (.env) 							
+ 			- ukázka v konzoli, že mám aktivní virtuální prostředí
+
+ 6. pip install django				
+			- nainstaluje mi do prostředí django
+    pip install crispy-bootstrap5
+    pip install crispy-forms
+
+ 7. django-admin startproject _project .	
+ 			- v této složce (.) mi založ složku s projektem _project
+
+ 8. dir (nebo LS) 				
+ 			- kontrola vytvořených složek a souborů
+
+ 9. python manage.py startapp myapp		
+ 			- spustí server (nastavit v PyCharmu edit configuration:
+						- name = runserver
+						- script = /manage.py
+						- script parameter = runserver
+						- working directory = /složka_s_projektem)
+
+10. struktura
+	- _project
+	- .env
+	- app / migrations
+	- app / static / app / index.css			
+			/* index css for application main */
+	- app / templates / app / index.thml 
+			{% comment %} index html for application main {% endcomment %}
+	- static / base.css
+			/* base css for project main */
+	- templates / base.html
+
+11. v settings zaregistrovat aplikaci a cesty k projektovým templates a static
+	INSTALLED_APPS = [
+	...
+    'main',                     # My app
+	'crispy_forms',             # form framework
+    'crispy_bootstrap5',        # form design
+	...]
+
+	TEMPLATES = [{
+			'DIRS': [ BASE_DIR / 'templates'],
+	}]
+
+	STATICFILES_DIRS = [
+		BASE_DIR / 'static'
+	]
+
+12. _project/urls.py:
+	from django.contrib import admin
+	from django.urls import path, include
+
+	urlpatterns = [
+		path('admin/', admin.site.urls),
+		path('', include('main.urls'))
+	]
+
+13. app/urls.py:
+	from django.urls import path
+	from . import views
+
+	urlpatterns = [
+		path ('', views.index, name='index')
+	]
+
+14. app/views.py:
+
+15. python manage.py makemigrations
+
+16. python manage.py migrate
+			- vytvoření db.sqlite3
+
+17. python manage.py createsuperuser
+			- vytvoří admin účet
+
+18. python manage.py runserver
+			- spustí server

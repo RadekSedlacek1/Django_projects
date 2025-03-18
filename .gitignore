@@ -1,0 +1,11 @@
+/repo/
+/test/
+/repo_old/
+
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+**/.env/
+
+.idea

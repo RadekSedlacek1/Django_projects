@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% comment %} index html for application main {% endcomment %}
+
+{% load static %}
+
+{% block css_files %}
+{% endblock css_files %}
+
+{% block title %}Create an account
+{% endblock title %}
+
+{% block page_title %}Create an account
+{% endblock page_title %}
+
+{% block content %}
+
+    <form method="post">
+        {% csrf_token %} {{ form|crispy }}
+        <p>
+            Have an account? Login
+            <a href="/login">Here!</a>
+            <button type="submit" class="btn btn-success">
+            Register
+            </button>
+        </p>
+    </form>
+
+{% endblock content %}
+

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block page_title %}
+    Chyba 404 - stránka nenalezena
+{% endblock page_title %}
+
+
+{% block content %}
+    <h1>Stránka nebyla nalezena</h1>
+    <h3>omlouváme se</h3>
+{% endblock content %}
