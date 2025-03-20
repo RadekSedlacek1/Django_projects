@@ -29,19 +29,35 @@
 
     </div>
     <div class="card-footer text-muted">
-        {{post.created_at}}
-        {% if user == post.author %}
+        <div>
+            {{post.created_at}}
+        </div>
+        <div>
+            {% if user == post.author or perms.main.delete_post %}
+                <form method="post">
+                    {% csrf_token %}
+                    <button 
+                    type="submit"
+                    class="btn btn-warning"
+                    name="post-id"
+                    value="{{ post.id }}">
+                        Delete this post
+                    </button>
+                </form>
+            {% endif %}
+            {% if user.is_staff %}  
             <form method="post">
                 {% csrf_token %}
                 <button 
                 type="submit"
                 class="btn btn-danger"
-                name="post-id"
-                value="{{ post.id }}">
-                    Delete this post
+                name="user-id"
+                value="{{ post.author.id }}">
+                    Ban this user
                 </button>
             </form>
-        {% endif %}
+            {% endif %}
+        </div>
     </div>
 </div>
 
