@@ -79,6 +79,11 @@
 
 14. app/views.py:
 
+from django.shortcuts import render
+
+	def index(request):
+		return render(request, 'main/index.html', {})
+
 15. python manage.py makemigrations
 
 16. python manage.py migrate
