@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% comment %} index html for project Bill_to_split {% endcomment %}
+
+{% load static %}
+
+{% block css_files %}    
+    <link rel="stylesheet" href="{% static 'main/styles/index.css' %}">
+{% endblock css_files %}
+
+{% block title %}Home page
+{% endblock title %}
+
+{% block page_title %} This is a home page
+{% endblock page_title %}
+
+{% block content %}
+    <p class="content">
+        {% lorem 4 p random %}
+    </p>
+{% endblock content %}

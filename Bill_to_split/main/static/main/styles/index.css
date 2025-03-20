@@ -1,0 +1,7 @@
+/* index css for project Bill_to_split */    
+
+p.content {
+    margin: 10px 0px;
+    width: 100%;            /* Roztáhne se na celou šířku */
+    text-align: justify;
+}
