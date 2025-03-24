@@ -1,0 +1,49 @@
+body {
+  max-width: 75%;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Navigační ikony*/
+
+#horni-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+#horni-nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    align-items: flex-start;            /* Všechny ikony budou zarovnány nahoře */
+}
+
+#horni-nav ul li {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 20%;                         /* Každá položka má stejnou šířku */
+    height: 20%;
+}
+
+#horni-nav ul li a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#horni-nav ul li img {
+    width: 8vw;                         /* Ikony budou mít pevnou šířku na základě šířky okna */
+    height: 8vw;                        /* Ikony budou čtvercové a udrží stejnou výšku */
+    transition: width 0.2s ease-in-out, height 0.2s ease-in-out; /* Plynulý přechod při změně velikosti */
+}
+
+#horni-nav ul li span {
+    font-size: 1.2vw;                   /* Velikost textu se přizpůsobí oknu */
+    margin-top: 5px;
+}

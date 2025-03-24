@@ -1,0 +1,77 @@
+{% extends 'Bill_2_split/_base.html' %}
+
+{% block Bill_2_split_content %}
+{% load static %}
+
+<nav id="horni-nav">
+    <ul>
+    <li><a href="{% url 'Bill_2_split:IndexView' %}">
+            <img src="{% static 'Bill_2_split/icons/home_page.png' %}"><span>Homepage</span></a></li>
+    <li><a href="{% url 'Bill_2_split:UserView' %}">
+            <img src="{% static 'Bill_2_split/icons/user.png' %}"><span>User selection</span></a></li>
+    <li><a href="{% url 'Bill_2_split:ListOfLedgersView' user.pk %}">
+            <img src="{% static 'Bill_2_split/icons/ledgers.png' %}"><span>Ledgers overview</span></a></li>
+    <li><a href="{% url 'Bill_2_split:LedgerDetailView' ledger.pk user.pk %}">
+            <img src="{% static 'Bill_2_split/icons/ledger.png' %}"><span>Ledger detail</span></a></li>
+    <li><a href="#">
+            <img src="{% static 'Bill_2_split/icons/glass.png' %}"><span>You are here</span></a></li>
+    </ul>
+</nav>
+
+<h1>
+    This is specific payment detail:
+</h1>
+
+<h2>{{ payment.name }}</h2>
+<p>Ledger name: {{ payment.ledger.name }}</p>
+<p>Entry created by: {{ payment.user.name }}</p>
+<p>Date of entry creation: {{ payment.entry_time }}</p>
+<p>Date of payment: {{ payment.payment_time }}</p>
+<p>Amount paid: {{ payment.cost }}</p>
+
+
+    {% for relation, balance_change in balance_change %}
+
+        {% if relation.relation > 0 %}
+
+                <p> This payment has been paid by {{ relation.user.name }} and the balance change due to this payment is: </p>
+                <p> {{ relation.user.name }} +{{ balance_change }} </p>
+
+        {% endif %}
+
+    {% endfor %}
+
+    {% for relation, balance_change in balance_change %}
+
+        {% if relation.relation < 0 %}
+
+                <p> {{ relation.user.name }}  {{ balance_change }} </p>
+
+        {% endif %}
+
+    {% endfor %}
+
+<nav>
+    <ul></ul>
+    <ul>
+        <li>
+            <a href="{% url 'Bill_2_split:PaymentEditView' payment_pk=payment.pk ledger_pk=ledger.pk user_pk=user.pk %}"> Edit payment</a>
+        </li>
+    </ul>
+</nav>
+
+<nav>
+    <ul></ul>
+    <ul>
+        <li>
+            <form method="post" action="{% url 'Bill_2_split:PaymentDeleteView' payment_pk=payment.pk ledger_pk=ledger.pk user_pk=user.pk %}">
+                {% csrf_token %}
+                <button type="submit">Delete payment</button>
+            </form>
+        </li>
+
+    </ul>
+</nav>
+
+
+{% endblock %}

@@ -1,0 +1,59 @@
+
+                        Kill the bill
+
+Téme práce: 
+Nástroj na rozdělení společných výdajů skupinou uživatelů
+
+Use case 1: 
+Krel, Martin a Marta jednou stanovat, 
+* Karel platí bnzín na cestu    - výdaj se dělí na všechny 3 osoby rovným dílem
+* Martin půjčovnu auta          - výdaj se dělí na všechny 3 osoby
+
+Use case 2:
+Karel, Martin, Marta, Honza a Jana jednou na výlet do Paříže,
+* Jana platí hotel              - výdaj se dělí na všech 5 osoby rovným dílem
+* Marta platí snídani           - výdaj se dělí mezi Martu a Janu 
+                                  poměrem 0,6 ku 0,4 (Marta měla dražší snídani)
+* Honza platí nákup             - výdaj se dělí mezi Honzu, Karla a Martina
+                                  poměrem 0,3 ku 0,2 ku 0,5
+* Karel zaplatí vstup do muzea  - do muzea jsou všichni mimo Marty
+                                  výdaj dělí rovnoměrně mezi 4 osoby
+
+Cílem aplikace je:
+1) výpočet platební bilance mezi uživateli
+2) grafické znázornění aktuální bilance - např sloupcovým grafem s kladnými a zápornými hodnotami
+3) navrhnout kdo má komu kolik zaplatit, aby se vzájemně vyrovnali
+4) rozlišovat platební bilance pro jednotlivé výlety - pro přehlednost
+
+
+K tomu bude potřeba:
+
+1) navrhnout databázový model
+
+2) vytvořit django strukturu projektu
+
+3) html stránky:
+    3.1) úvodní_stránka.html - registrace / přihlášení uživatele
+    3.2) přehled_ledgerů.html
+    3.3) ledger.html - zde bude zobrazena:
+            a) aktuální finanční bilance pro tento výlet
+            b) návrh vyrovnání
+            c) přehled zápisů (stránkovaný)
+            d) možnost pozvat na výlet uživatele XYZ
+            e) možnost přidat / editovat / smazat výdaj
+    3.4) výdaj.html
+            a) zobrazní detajlů výdaje
+
+4) napsat funkce zadávání a získávání dat z/do databíze
+
+5) dynamicky generovaný obsah z databáze na základě přihlášeného uživatele
+
+6) dynamické url podle uživatele / ledgeru / výdaje (slagy?)
+
+7) zabezpečit přístup jen přihlášenému uživateli
+
+8) ledger, expense má ownera:
+    a) owner ledgeru může přidat / editovat / smazat jakýkoli záznam
+    b) owner výdaje (expense) může přidat / editovat / smazat tento záznam
+
+

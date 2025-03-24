@@ -1,0 +1,29 @@
+{% extends 'Bill_2_split/_base.html' %}
+
+{% block Bill_2_split_content %}
+{% load static %}
+
+<nav id="horni-nav">
+    <ul><li><a href="{% url 'Bill_2_split:IndexView' %}">
+            <img src="{% static 'Bill_2_split/icons/home_page.png' %}"><span>Homepage</span></a></li>
+        <li><a href="{% url 'Bill_2_split:UserView' %}">
+            <img src="{% static 'Bill_2_split/icons/user.png' %}"><span>User selection</span></a></li>
+        <li><a href="{% url 'Bill_2_split:ListOfLedgersView' user.pk %}">
+            <img src="{% static 'Bill_2_split/icons/ledgers.png' %}"><span>You are here</span></a></li>
+        <li><a href=""><img src="{% static 'Bill_2_split/icons/bw_ledger.png' %}"></a></li>
+        <li><a href=""><img src="{% static 'Bill_2_split/icons/bw_glass.png' %}"></a></li>
+    </ul>
+</nav>
+
+<h1>Add new ledger</h1>
+    <form action="{% url 'Bill_2_split:LedgerAddView' user_pk=user.pk %}" method="POST">
+
+        {% csrf_token %}
+
+        {{ form }}
+
+        <button type="submit">Create new ledger</button>
+    </form>
+
+
+{% endblock %}

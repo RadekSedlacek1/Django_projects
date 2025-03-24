@@ -1,0 +1,12 @@
+{% extends 'Bill_2_split/_base.html' %}
+
+{% block Bill_2_split_content %}
+<h1>Are you sure you want to delete this payment?</h1>
+<p>Once deleted, this action cannot be undone.</p>
+
+<form method="post" action="{% url 'Bill_2_split:PaymentDeleteView' payment_pk=object.pk ledger_pk=ledger.pk user_pk=user.pk %}">
+    {% csrf_token %}
+    <button type="submit">Confirm Delete</button>
+    <a href="{% url 'Bill_2_split:LedgerDetailView' ledger.pk user.pk %}">Cancel</a>
+</form>
+{% endblock %}

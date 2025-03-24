@@ -1,0 +1,45 @@
+{% extends 'Bill_2_split/_base.html' %}
+
+{% block Bill_2_split_content %}
+{% load static %}
+
+<nav id="horni-nav">
+    <ul>
+        <li><a href="{% url 'Bill_2_split:IndexView' %}">
+            <img src="{% static 'Bill_2_split/icons/home_page.png' %}"><span>You are here</span></a></li>
+        <li><a href="{% url 'Bill_2_split:UserView' %}">
+            <img src="{% static 'Bill_2_split/icons/user.png' %}"><span>Start here</span></a></li>
+        <li><a href=""><img src="{% static 'Bill_2_split/icons/bw_ledgers.png' %}"></a></li>
+        <li><a href=""><img src="{% static 'Bill_2_split/icons/bw_ledger.png' %}"></a></li>
+        <li><a href=""><img src="{% static 'Bill_2_split/icons/bw_glass.png' %}"></a></li>
+    </ul>
+</nav>
+
+<section>
+  <header>
+    <h1>Bill 2 Split</h1>
+      <h3>Simple Expense Sharing</h3>
+    <p>Welcome to Bill 2 Split, the app that simplifies managing shared expenses and dividing costs among multiple users.
+    This app helps you efficiently track payments, keep records of transactions, and manage relationships between friends, family, or colleagues.</p>
+  </header>
+
+
+    <h2>Purpose of the App</h2>
+    <p>Bill 2 Split is designed for anyone who needs a simple way to track shared expenses. Whether it's for a group trip, household budget, or work-related costs,
+    this app allows you to easily create payments, add users, and keep track of who owes what.</p>
+
+    <h2>Main Features</h2>
+    <ul>
+      <li>Payment and expense distribution management</li>
+      <li>Creating and tracking payments</li>
+      <li>Overview of cost-sharing between users</li>
+      <li>Quick and easy addition of payments</li>
+    </ul>
+
+
+  <footer>
+    <p><strong>Start Today!</strong> Sign up and begin tracking your expenses with Bill 2 Split.</p>
+  </footer>
+</section>
+
+{% endblock %}

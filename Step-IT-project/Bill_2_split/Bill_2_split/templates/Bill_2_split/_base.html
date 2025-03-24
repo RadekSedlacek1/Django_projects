@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <link rel="stylesheet" href="{% static 'Bill_2_split/pico.min.css' %}">
+    <link rel="stylesheet" href="{% static 'Bill_2_split/base.css' %}">
+    <title>{{ view.title }}</title>
+</head>
+<body>
+
+    <main class="container">
+
+
+        {% block Bill_2_split_content %}
+
+        {% endblock %}
+    </main>
+
+
+</body>
+</html>

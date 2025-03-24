@@ -1,0 +1,59 @@
+
+{% extends 'Bill_2_split/_base.html' %}
+
+{% block Bill_2_split_content %}
+{% load static %}
+
+<nav id="horni-nav">
+    <ul>
+        <li><a href="{% url 'Bill_2_split:IndexView' %}">
+            <img src="{% static 'Bill_2_split/icons/home_page.png' %}"><span>Homepage</span></a></li>
+        <li><a href="{% url 'Bill_2_split:UserView' %}">
+            <img src="{% static 'Bill_2_split/icons/user.png' %}"><span>User selection</span></a></li>
+        <li><a href="{% url 'Bill_2_split:ListOfLedgersView' user.pk %}">
+            <img src="{% static 'Bill_2_split/icons/ledgers.png' %}"><span>Ledgers overview</span></a></li>
+        <li><a href="{% url 'Bill_2_split:LedgerDetailView' ledger.pk user.pk %}">
+            <img src="{% static 'Bill_2_split/icons/ledger.png' %}"><span>You are here</span></a></li>
+        <li><a href=""><img src="{% static 'Bill_2_split/icons/bw_glass.png' %}"></a></li>
+    </ul>
+</nav>
+
+<h1>
+    {{ ledger.name }}
+</h1>
+
+<p> {{ ledger.desc }}</p>
+<p></p>
+<p></p>
+
+<h2>Users associated with this ledger and their balance:</h2>
+<ul>
+    {% for user_balance in user_balances %}
+    <li>{{ user_balance }}</li>
+    {% empty %}
+    <li>No users associated with this ledger.</li>
+    {% endfor %}
+</ul>
+
+<ul>
+    {% for payment in payments %}
+    <li>
+        <a href="{% url 'Bill_2_split:PaymentDetailView' payment.pk ledger.pk user.pk %}"> {{ payment.name }} </a>
+    </li>
+    {% endfor %}
+</ul>
+
+<nav>
+    <ul>
+        <li>
+            <a href="{% url 'Bill_2_split:PaymentAddView' ledger.pk user.pk %}">Add new payment</a>
+        </li>
+    </ul>
+    <ul>
+        <li>
+            <a href="{% url 'Bill_2_split:LedgerEditView' ledger.pk user.pk %}"> Edit ledger</a>
+        </li>
+    </ul>
+</nav>
+
+{% endblock %}

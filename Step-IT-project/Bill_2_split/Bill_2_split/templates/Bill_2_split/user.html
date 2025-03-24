@@ -1,0 +1,36 @@
+{% extends 'Bill_2_split/_base.html' %}
+
+{% block Bill_2_split_content %}
+{% load static %}
+
+<nav id="horni-nav">
+    <ul>
+        <li><a href="{% url 'Bill_2_split:IndexView' %}">
+            <img src="{% static 'Bill_2_split/icons/home_page.png' %}"><span>Homepage</span></a></li>
+        <li><a href="{% url 'Bill_2_split:UserView' %}">
+            <img src="{% static 'Bill_2_split/icons/user.png' %}"><span>You are here</span></a></li>
+        <li><a href=""><img src="{% static 'Bill_2_split/icons/bw_ledgers.png' %}"></a></li>
+        <li><a href=""><img src="{% static 'Bill_2_split/icons/bw_ledger.png' %}"></a></li>
+        <li><a href=""><img src="{% static 'Bill_2_split/icons/bw_glass.png' %}"></a></li>
+    </ul>
+</nav>
+
+<h1>
+    Select a User
+</h1>
+
+<p>
+    Please select a user from the list below to continue. User registration and login features are not yet available, but this will allow you to proceed in this demo.
+</p>
+
+<ul>
+    {% for user in users %}
+
+    <li>
+        <a href="{% url 'Bill_2_split:ListOfLedgersView' user.pk%}"> {{ user.name }} </a>
+    </li>
+
+    {% endfor %}
+</ul>
+
+{% endblock %}

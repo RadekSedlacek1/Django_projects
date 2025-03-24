@@ -1,0 +1,43 @@
+{% extends 'Bill_2_split/_base.html' %}
+
+{% block Bill_2_split_content %}
+{% load static %}
+
+<nav id="horni-nav">
+    <ul>
+    <li><a href="{% url 'Bill_2_split:IndexView' %}">
+            <img src="{% static 'Bill_2_split/icons/home_page.png' %}"><span>Homepage</span></a></li>
+    <li><a href="{% url 'Bill_2_split:UserView' %}">
+            <img src="{% static 'Bill_2_split/icons/user.png' %}"><span>User selection</span></a></li>
+    <li><a href="{% url 'Bill_2_split:ListOfLedgersView' user.pk %}">
+            <img src="{% static 'Bill_2_split/icons/ledgers.png' %}"><span>Ledgers overview</span></a></li>
+    <li><a href="{% url 'Bill_2_split:LedgerDetailView' ledger.pk user.pk %}">
+            <img src="{% static 'Bill_2_split/icons/ledger.png' %}"><span>Ledger detail</span></a></li>
+    <li><a href="#">
+            <img src="{% static 'Bill_2_split/icons/glass.png' %}"><span>You are here</span></a></li>
+    </ul>
+</nav>
+
+<h1>Detail Payment: {{ payment.name }}</h1>
+<p>Cost: {{ payment.cost }}</p>
+<p>Description: {{ payment.desc }}</p>
+
+<h2>Ledger: {{ ledger.name }}</h2>
+<p>Managed by: {{ user.username }}</p>
+
+<form method="post">
+    {% csrf_token %}
+
+    <h2>Add Relations for Users</h2>
+
+    {% for form in relation_forms %}
+        <div>
+            <h3>User: {{ form.instance.user.username }}</h3>
+            {{ form.as_p }}
+        </div>
+    {% endfor %}
+
+    <button type="submit">Add Relations</button>
+</form>
+
+{% endblock %}
