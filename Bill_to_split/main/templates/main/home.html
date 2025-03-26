@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% comment %} index html for aplication main in project Bill_to_split {% endcomment %}
+{% comment %} user home overview for aplication main in project Bill_to_split {% endcomment %}
 
 {% load static %}
 
@@ -8,10 +8,10 @@
     <link rel="stylesheet" href="{% static 'main/styles/index.css' %}">
 {% endblock css_files %}
 
-{% block title %}Home page
+{% block title %}User page
 {% endblock title %}
 
-{% block page_title %} This is a home page
+{% block page_title %} Overview of {{ user.username }}
 {% endblock page_title %}
 
 {% block content %}

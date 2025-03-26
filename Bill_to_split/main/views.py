@@ -7,19 +7,22 @@ from .models import Ledger, Payment, PaymentBalance
 from .forms import UserRegisterForm, LedgerForm, PaymentForm, PaymentBalanceForm, PaymentBalanceFormSet
 from django.forms import inlineformset_factory
 
+def index(request):
+    return render(request, 'main/_index.html')
+
 def sign_up(request):
     if request.method =='POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('/index')
+            return redirect('/home')
     else:
         form = UserRegisterForm()
     return render(request, 'registration/sign_up.html', {"form": form})
 
-# @login_required(login_url="/login")     # if not login, redirect to: /login
-def index(request):
+@login_required(login_url="/login")     # if not login, redirect to: /login
+def home(request):
     ledgers = Ledger.objects.all()
     if request.method == "POST":
         ledger_id = request.POST.get("ledger-id")
@@ -27,10 +30,32 @@ def index(request):
             ledger = Ledger.objects.filter(id=ledger_id).first()
             if ledger and (ledger.author == request.user):
                 ledger.delete()
-    return render(request, 'main/index.html', {"ledgers":ledgers})
+    return render(request, 'main/home.html', {"ledgers":ledgers})
+
+@login_required(login_url="/login")     # if not login, redirect to: /login
+def list_of_ledgers(request):
+    ledgers = Ledger.objects.all()
+    if request.method == "POST":
+        ledger_id = request.POST.get("ledger-id")
+        if ledger_id:
+            ledger = Ledger.objects.filter(id=ledger_id).first()
+            if ledger and (ledger.author == request.user):
+                ledger.delete()
+    return render(request, 'main/list_of_ledgers.html', {"ledgers":ledgers})
+
+@login_required(login_url="/login")     # if not login, redirect to: /login
+def list_of_payments(request):
+    ledgers = Ledger.objects.all()
+    if request.method == "POST":
+        ledger_id = request.POST.get("ledger-id")
+        if ledger_id:
+            ledger = Ledger.objects.filter(id=ledger_id).first()
+            if ledger and (ledger.author == request.user):
+                ledger.delete()
+    return render(request, 'main/list_of_payments.html', {"ledgers":ledgers})
 
 # From Chat GPT: - redo later
-# @login_required(login_url="/login")
+@login_required(login_url="/login")
 def create_payment(request):
     PaymentBalanceFormSetFactory = inlineformset_factory(
         Payment, PaymentBalance, form=PaymentBalanceForm, formset=PaymentBalanceFormSet, extra=2  # Výchozí 2 řádky
@@ -43,7 +68,6 @@ def create_payment(request):
                 payment = form.save(commit=False)
                 payment.user = request.user  # Přiřazení aktuálního uživatele jako vlastníka platby
                 payment.save()
-
                 formset.instance = payment
                 formset.save()  # Uloží všechny záznamy v PaymentBalance
 

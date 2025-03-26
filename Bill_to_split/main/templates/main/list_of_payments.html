@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% comment %} list of payments of user for aplication main in project Bill_to_split {% endcomment %}
+
+{% load static %}
+
+{% block css_files %}    
+    <link rel="stylesheet" href="{% static 'main/styles/payment.css' %}">
+{% endblock css_files %}
+
+{% block title %}List od payments
+{% endblock title %}
+
+{% block page_title %} Payments overview of {{ user.username }}
+{% endblock page_title %}
+
+{% block content %}
+
+
+
+{% endblock content %}

@@ -1,4 +1,4 @@
-{% comment %} base html for project Bill_to_split {% endcomment %}
+{% comment %} base html for aplication main in project Bill_to_split {% endcomment %}
 
 {% load static %}
 
@@ -24,23 +24,28 @@
 </head>
 <body>
 
-
     <nav class="top_navbar">
         <ul class="nav_left">
             <li class="">
                 <form method="post" action="{% url 'index' %}">
                     {% csrf_token %}
-                    <button type="submit" class="">Home</button>
+                    <button type="submit" class="">Welcome page</button>
                 </form>
             </li>
             <li class="">
-                <form method="post" action="">
+                <form method="post" action="{% url 'home' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="outline">My overview</button>
+                </form>
+            </li>
+            <li class="">
+                <form method="post" action="{% url 'list_of_ledgers' %}">
                     {% csrf_token %}
                     <button type="submit" class="outline">Ledgers</button>
                 </form>
             </li>
             <li class="">
-                <form method="post" action="">
+                <form method="post" action="{% url 'list_of_payments' %}">
                     {% csrf_token %}
                     <button type="submit" class="outline">Payments</button>
                 </form>
@@ -66,7 +71,6 @@
             {% endif %}
         </ul>
     </nav>
-
 
     <div class= "h1_title">
         <h1>

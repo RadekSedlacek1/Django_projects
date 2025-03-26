@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% comment %} ledger edit html for aplication main in project Bill_to_split {% endcomment %}
+{% comment %} list of ledgers of user for aplication main in project Bill_to_split {% endcomment %}
 
 {% load static %}
 
@@ -11,7 +11,7 @@
 {% block title %}List od ledgers
 {% endblock title %}
 
-{% block page_title %} This page shows an overview of ledgers
+{% block page_title %} Ledgers overview of {{ user.username }}
 {% endblock page_title %}
 
 {% block content %}
