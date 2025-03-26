@@ -1,17 +1,23 @@
 /* base css for project Bill_to_split */
 
-body {
-    background-color: #212529;
-    color: white;
+* {
+    margin: 0;
+    padding: 0;
 }
 
-div.h1_title {
-    color: #171717;
-    background-color: #a2a2a8;
-    padding: 5px;
-    margin: 20px;
-    display: flex;
-    justify-content: center;   /* Zarovnání textu na střed */
-    align-items: center;       /* Vertikální zarovnání */
-    border-radius: 5px;
+.nav_left {
+    padding-left: 30px;
+}
+
+.nav_right {
+    padding-right: 30px;
+}
+
+.h1_title {
+    padding-left: 45px;
+}
+
+.content {
+    padding-left: 30px;
+    padding-right: 30px;
 }

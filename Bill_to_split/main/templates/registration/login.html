@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% comment %} user login to aplication main in project Bill_to_split {% endcomment %}
+
+{% load static %}
+
+{% block css_files %}
+{% endblock css_files %}
+
+{% block title %}User login
+{% endblock title %}
+
+{% block page_title %}User login
+{% endblock page_title %}
+
+{% block content %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <p>
+            Don't have an account: Create one
+            <button type="button" onclick="window.location.href='{% url 'sign_up' %}';" class="outline">
+            Here!
+            </button>
+        </p>
+
+        {{ form }}
+
+        <p>
+            <button type="submit" class="">
+            Login
+            </button>
+        </p>
+    </form>
+
+{% endblock content %}
+

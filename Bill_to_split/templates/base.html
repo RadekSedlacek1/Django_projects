@@ -8,7 +8,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <meta name="color-scheme" content="light dark" />
+    <link rel="stylesheet" href="{% static 'styles/pico.amber.min.css' %}">
     <link rel="stylesheet" href="{% static 'styles/base.css' %}">
 
     {% block css_files %}
@@ -22,7 +23,51 @@
 
 </head>
 <body>
-    
+
+
+    <nav class="top_navbar">
+        <ul class="nav_left">
+            <li class="">
+                <form method="post" action="{% url 'index' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="">Home</button>
+                </form>
+            </li>
+            <li class="">
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="outline">Ledgers</button>
+                </form>
+            </li>
+            <li class="">
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="outline">Payments</button>
+                </form>
+            </li>
+        </ul>
+
+        <ul class="nav_right">
+            {% if user.is_authenticated %}
+            <span class="">Logged in as {{ user.username }} |</span>
+                <li class="">
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="outline">Logout</button>
+                    </form>
+                </li>
+            {% else %}
+                <li class="">
+                    <form method="post" action="{% url 'login' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="">Login</button>
+                    </form>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+
     <div class= "h1_title">
         <h1>
             {% block page_title %}
@@ -30,8 +75,10 @@
         </h1>
     </div>
 
-    {% block content %}
-    {% endblock content %}
+    <div class= "content">
+        {% block content %}
+        {% endblock content %}
+    </div>
 
 </body>
 </html>
