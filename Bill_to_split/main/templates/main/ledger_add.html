@@ -16,6 +16,18 @@
 
 {% block content %}
 
+<form method="post">
+    {% csrf_token %}
+
+
+    {{ form }}
+
+    <p>
+        <button type="submit" class="">
+        Create a Ledger
+        </button>
+    </p>
+</form>
 
 
 {% endblock content %}

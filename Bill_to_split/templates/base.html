@@ -32,6 +32,30 @@
                     <button type="submit" class="">Welcome page</button>
                 </form>
             </li>
+            
+            {% if user.is_authenticated %}
+
+            <li class="">
+                <form method="post" action="{% url 'home' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="">My overview</button>
+                </form>
+            </li>
+            <li class="">
+                <form method="post" action="{% url 'list_of_ledgers' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="">Ledgers</button>
+                </form>
+            </li>
+            <li class="">
+                <form method="post" action="{% url 'list_of_payments' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="">Payments</button>
+                </form>
+            </li>
+
+            {% else %}
+
             <li class="">
                 <form method="post" action="{% url 'home' %}">
                     {% csrf_token %}
@@ -50,6 +74,9 @@
                     <button type="submit" class="outline">Payments</button>
                 </form>
             </li>
+
+            {% endif %}
+
         </ul>
 
         <ul class="nav_right">
@@ -58,7 +85,7 @@
                 <li class="">
                     <form method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
-                        <button type="submit" class="outline">Logout</button>
+                        <button type="submit" class="">Logout</button>
                     </form>
                 </li>
             {% else %}

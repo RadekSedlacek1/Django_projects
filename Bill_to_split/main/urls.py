@@ -3,12 +3,19 @@ from . import views
 from django.contrib.auth.views import LoginView, LogoutView
 
 urlpatterns = [
-
+    
+##############################        main urls        ##############################
+    
     path('', views.index, name='index'),
 # welcome page with app desc and stats
 
-    path('welcome', views.index, name='index'),
-# welcome page with app desc and stats
+    path('welcome/', views.index, name='index'),
+# welcome page redirect after login
+
+    path('home/', views.home, name='home'),
+# user overview and stats
+
+##############################  Account management urls  ##############################
 
     path('sign-up/', views.sign_up, name='sign_up'),
 # account creation
@@ -17,16 +24,35 @@ urlpatterns = [
 # user login
 
     path('logout/', LogoutView.as_view(), name='logout'),
-# redirected to login
+# redirected to login in settings.py
 
-    path('home/', views.home, name='home'),
-# user overview and stats
+##############################    Ledger related urls    ##############################
 
     path('list_of_ledgers/', views.list_of_ledgers, name='list_of_ledgers'),
-# user overview and stats
+# all ledgers overview and stats
+
+    path('ledger_add/', views.ledger_add, name='ledger_add'),
+# create a new empty ledger
+
+    path('ledger_detail/<int:ledger_pk>/', views.ledger_detail, name='ledger_detail'),
+# one ledger overview and stats
+
+    path('ledger_edit/<int:ledger_pk>/', views.ledger_edit, name='ledger_edit'),
+# edit name, desc. and users in the Ledger
+
+##############################    Payment related urls    ##############################
 
     path('list_of_payments/', views.list_of_payments, name='list_of_payments'),
-# user overview and stats
+# payments overview and stats
+
+    path('payment_add/', views.payment_add, name='payment_add'),
+# create a new payment
+
+    path('payment_detail/<int:payment_pk>/', views.payment_detail, name='payment_detail'),
+# one payment overview and payment + or - balance increment for users in the ledger
+
+    path('payment_edit/<int:payment_pk>', views.payment_edit, name='payment_edit'),
+# edit name and desc of the payment and payment + or - balance increment for users of this payment
 
 ]
 

@@ -7,8 +7,23 @@ from .models import Ledger, Payment, PaymentBalance
 from .forms import UserRegisterForm, LedgerForm, PaymentForm, PaymentBalanceForm, PaymentBalanceFormSet
 from django.forms import inlineformset_factory
 
+##############################        main views        ##############################
+
 def index(request):
     return render(request, 'main/_index.html')
+
+@login_required(login_url="/login")     # if not loged in, redirect to: /login
+def home(request):
+    ledgers = Ledger.objects.all()
+    if request.method == "POST":
+        ledger_id = request.POST.get("ledger-id")
+        if ledger_id:
+            ledger = Ledger.objects.filter(id=ledger_id).first()
+            if ledger and (ledger.author == request.user):
+                ledger.delete()
+    return render(request, 'main/home.html', {"ledgers":ledgers})
+
+##############################  Account management views  ##############################
 
 def sign_up(request):
     if request.method =='POST':
@@ -21,29 +36,46 @@ def sign_up(request):
         form = UserRegisterForm()
     return render(request, 'registration/sign_up.html', {"form": form})
 
-@login_required(login_url="/login")     # if not login, redirect to: /login
-def home(request):
-    ledgers = Ledger.objects.all()
-    if request.method == "POST":
-        ledger_id = request.POST.get("ledger-id")
-        if ledger_id:
-            ledger = Ledger.objects.filter(id=ledger_id).first()
-            if ledger and (ledger.author == request.user):
-                ledger.delete()
-    return render(request, 'main/home.html', {"ledgers":ledgers})
+##############################    Ledger related views    
+##############################
 
-@login_required(login_url="/login")     # if not login, redirect to: /login
+@login_required(login_url="/login")
 def list_of_ledgers(request):
-    ledgers = Ledger.objects.all()
-    if request.method == "POST":
-        ledger_id = request.POST.get("ledger-id")
+    
+    if request.method == "POST":                                # when from template returns POST
+        ledger_id = request.POST.get("ledger-id")               # take the id form the template
         if ledger_id:
-            ledger = Ledger.objects.filter(id=ledger_id).first()
-            if ledger and (ledger.author == request.user):
-                ledger.delete()
+            ledger = Ledger.objects.filter(id=ledger_id).first()    # take this ledger from the db
+            ledger.delete()
+            print(f"{ledger} deleted")
+        
+    ledgers = Ledger.objects.all()
     return render(request, 'main/list_of_ledgers.html', {"ledgers":ledgers})
 
-@login_required(login_url="/login")     # if not login, redirect to: /login
+@login_required(login_url="/login")
+def ledger_add(request):
+    if request.method == 'POST':                # if sending filled form
+        form = LedgerForm(request.POST)
+        if form.is_valid():                     # and if it fits database
+            ledger = form.save(commit=False)    # do not send it yet
+            ledger.user = request.user          # who saved is is a owner
+            ledger.save()                       # now save it
+            return redirect ('/list_of_ledgers')
+    else:                                       # if not sending form yet
+        form = LedgerForm()                     
+    return render(request, 'main/ledger_add.html', {"form": form})
+
+@login_required(login_url="/login")
+def ledger_detail(request):
+    return render(request, 'main/ledger_detail.html', {})
+
+@login_required(login_url="/login")
+def ledger_edit(request):
+    return render(request, 'main/ledger_edit.html', {})
+
+##############################    Payment related views    ##############################
+
+@login_required(login_url="/login")
 def list_of_payments(request):
     ledgers = Ledger.objects.all()
     if request.method == "POST":
@@ -56,7 +88,7 @@ def list_of_payments(request):
 
 # From Chat GPT: - redo later
 @login_required(login_url="/login")
-def create_payment(request):
+def payment_add(request):
     PaymentBalanceFormSetFactory = inlineformset_factory(
         Payment, PaymentBalance, form=PaymentBalanceForm, formset=PaymentBalanceFormSet, extra=2  # Výchozí 2 řádky
     )
@@ -70,10 +102,16 @@ def create_payment(request):
                 payment.save()
                 formset.instance = payment
                 formset.save()  # Uloží všechny záznamy v PaymentBalance
-
             return redirect("success_url")  # Přesměrování po uložení
     else:
         form = PaymentForm()
         formset = PaymentBalanceFormSetFactory()
-    return render(request, "payment_form.html", {"form": form, "formset": formset})
+    return render(request, "main/payment_add.html", {"form": form, "formset": formset})
 
+@login_required(login_url="/login")
+def payment_detail(request):
+    return render(request, 'main/payment_detail.html', {})
+
+@login_required(login_url="/login")
+def payment_edit(request):
+    return render(request, 'main/payment_edit.html', {})

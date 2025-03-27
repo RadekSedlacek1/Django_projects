@@ -15,7 +15,12 @@
 {% endblock page_title %}
 
 {% block content %}
-    <p>
-        {% lorem 4 p random %}
-    </p>
+
+<ul>
+    <li>{{ user.username }} statistics</li>
+    <li>Number of friends</li>
+    <li>Number of {{ user.username }} ledgers and payments</li>
+    <li>Total spendings by {{ user.username }}</li>
+</ul>
+
 {% endblock content %}

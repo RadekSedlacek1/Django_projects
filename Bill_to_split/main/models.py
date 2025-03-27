@@ -15,7 +15,7 @@ class AbstractBase(models.Model):
         abstract = True
 # Return your name
     def __str__(self):  
-        return f"{self.name}, ID: {self.id}"
+        return f"{self.name}, type: {self.__class__.__name__}, ID: {self.id}"
 
 # When saving create a slug after creating pk
     def save(self, *args, **kwargs):

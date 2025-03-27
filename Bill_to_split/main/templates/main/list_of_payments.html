@@ -16,6 +16,9 @@
 
 {% block content %}
 
-
+<form method="post" action="{% url 'payment_add' %}">
+    {% csrf_token %}
+    <button type="submit" class="">New payment</button>
+</form>
 
 {% endblock content %}
