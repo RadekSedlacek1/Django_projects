@@ -16,6 +16,52 @@
 
 {% block content %}
 
+{% for payment in payments %}
+
+<div class="card">
+
+    <div class="card-header">
+        <strong> {{ payment.name }}</strong>
+        <p> Payment owner: {{payment.user}} </p>
+        <hr>
+    </div>
+
+    <div class="card-body d-flex flex-row justify-content-between">
+        <div>
+            <p>{{ payment.desc}}</p>
+        </div>
+    </div>
+
+    <div class="card-footer text-muted">
+
+        <div>
+            {{payment.created_at}}
+        </div>
+
+        <div>
+            {% if user == payment.user%}
+                <form method="post">
+                    {% csrf_token %}
+                    <button 
+                    type="submit"
+                    class=""
+                    name="payment-id"
+                    value="{{ payment.id }}">
+                        Delete this payment
+                    </button>
+                </form>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% empty %}
+
+<p>So far there is no payment connected to your name, start by creating one.</p>
+
+{% endfor %}
+
 <form method="post" action="{% url 'payment_add' %}">
     {% csrf_token %}
     <button type="submit" class="">New payment</button>

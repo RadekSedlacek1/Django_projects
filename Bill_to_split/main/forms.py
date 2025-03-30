@@ -20,9 +20,10 @@ class LedgerForm(forms.ModelForm):
         }
 
 class PaymentForm(forms.ModelForm):
+    ledger = forms.ModelChoiceField(queryset=Ledger.objects.all(), required=True, label="Select Ledger")
     class Meta:
         model = Payment
-        fields = ["name", "cost", "desc"]
+        fields = ["ledger", "name", "cost", "desc"]
         widgets = {
             "desc": forms.Textarea(attrs={"rows": 3, "placeholder": "Description"}),
         }
@@ -32,18 +33,12 @@ class PaymentBalanceForm(forms.ModelForm):
         model = PaymentBalance
         fields = ["user", "balance"]
         widgets = {
-            "balance": forms.NumberInput(attrs={"placeholder": "Balance Value"}),
+            "balance": forms.NumberInput(attrs={"placeholder": "payment balance"}),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-class PaymentBalanceFormSet(BaseInlineFormSet):
-    def clean(self):
-        """Validation - sum of balances must be equal to zero."""
-        super().clean()
-
-        total_balance = 0
-        for form in self.forms:
-            if form.cleaned_data and not form.cleaned_data.get("DELETE", False):
-                total_balance += form.cleaned_data.get("balance", 0)
-
-        if abs(total_balance) > 0.001:  # to cover a rounding error
-            raise ValidationError("Sum of balances must be zero! Sum of balalnces is: {:.2f}".format(total_balance))
+        self.fields['user'].required = False
+        self.fields['balance'].required = False
+        # To allow sending form from template with empty fields

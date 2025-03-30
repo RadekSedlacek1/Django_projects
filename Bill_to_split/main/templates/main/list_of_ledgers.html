@@ -22,11 +22,12 @@
 
             <div class="card-header">
                 <strong> {{ ledger.name }}</strong>
+                <p> Ledger owner: {{ledger.user}} </p>
+                <hr>
             </div>
 
             <div class="card-body d-flex flex-row justify-content-between">
                 <div>
-                    <h5 class="card-title">{{ post.title }}</h5>
                     <p>{{ ledger.desc}}</p>
                 </div>
             </div>
@@ -54,16 +55,6 @@
                 </div>
             </div>
         </div>
-
-
-
-
-
-
-
-
-
-
 
     {% empty %}
 

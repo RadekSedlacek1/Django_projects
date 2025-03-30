@@ -16,19 +16,29 @@
 
 {% block content %}
 
-<form method="post">
+{% comment %} <form method="post"> {% endcomment %}
+<form method="post" action="{% url 'payment_add' %}">
     {% csrf_token %}
-    
-    <h2>Payment Details</h2>
-    {{ form.as_p }}
 
-    <h2>Split Payment</h2>
-    {{ formset.management_form }}
-    {% for form in formset %}
-        {{ form.as_p }}
+    <div>
+
+        {{ payment }}
+
+    </div>
+
+
+    <div>
+    {% for balance in balances %}
+
+
+        {{ balance }}
+        <hr>
+
     {% endfor %}
+    </div>
+            
+    <button type="submit">Submit</button>
 
-    <button type="submit">Save Payment</button>
 </form>
 
 {% endblock content %}
