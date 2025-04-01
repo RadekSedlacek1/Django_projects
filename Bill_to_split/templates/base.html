@@ -9,8 +9,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark" />
-    <link rel="stylesheet" href="{% static 'styles/pico.amber.min.css' %}">
+
+    {% comment %} Script to keep changed theme {% endcomment %}
+    <script>
+        (function() {
+            // load of values from localStorage
+            const savedTheme = localStorage.getItem("theme") || "auto";
+            const savedColor = localStorage.getItem("color-theme") || "{% static 'styles/pico.amber.min.css' %}";
+
+            // Setting theme
+            document.documentElement.setAttribute("data-theme", savedTheme);
+
+            // Settinf color scheme
+            document.write(`<link id="theme-stylesheet" rel="stylesheet" href="${savedColor}">`);
+        })();
+    </script>
+
     <link rel="stylesheet" href="{% static 'styles/base.css' %}">
+
+<style>
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background: var(--pico-background-color);
+        border: 1px solid var(--pico-primary);
+        padding: 5px;
+        z-index: 1;
+    }
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+</style>
 
     {% block css_files %}
     {% endblock css_files %}
@@ -24,12 +57,14 @@
 </head>
 <body>
 
+ 
+
     <nav class="top_navbar">
         <ul class="nav_left">
             <li class="">
                 <form method="post" action="{% url 'index' %}">
                     {% csrf_token %}
-                    <button type="submit" class="">Welcome page</button>
+                    <button type="submit" class='button-small'>Welcome page</button>
                 </form>
             </li>
             
@@ -38,19 +73,19 @@
             <li class="">
                 <form method="post" action="{% url 'home' %}">
                     {% csrf_token %}
-                    <button type="submit" class="">My overview</button>
+                    <button type="submit" class='button-small'>My overview</button>
                 </form>
             </li>
             <li class="">
                 <form method="post" action="{% url 'list_of_ledgers' %}">
                     {% csrf_token %}
-                    <button type="submit" class="">Ledgers</button>
+                    <button type="submit" class='button-small'>Ledgers</button>
                 </form>
             </li>
             <li class="">
                 <form method="post" action="{% url 'list_of_payments' %}">
                     {% csrf_token %}
-                    <button type="submit" class="">Payments</button>
+                    <button type="submit" class='button-small'>Payments</button>
                 </form>
             </li>
 
@@ -59,19 +94,19 @@
             <li class="">
                 <form method="post" action="{% url 'home' %}">
                     {% csrf_token %}
-                    <button type="submit" class="outline">My overview</button>
+                    <button type="submit" class='button-small outline'>My overview</button>
                 </form>
             </li>
             <li class="">
                 <form method="post" action="{% url 'list_of_ledgers' %}">
                     {% csrf_token %}
-                    <button type="submit" class="outline">Ledgers</button>
+                    <button type="submit" class='button-small outline'>Ledgers</button>
                 </form>
             </li>
             <li class="">
                 <form method="post" action="{% url 'list_of_payments' %}">
                     {% csrf_token %}
-                    <button type="submit" class="outline">Payments</button>
+                    <button type="submit" class='button-small outline'>Payments</button>
                 </form>
             </li>
 
@@ -80,19 +115,42 @@
         </ul>
 
         <ul class="nav_right">
+
+            <li><button id="theme-toggle">🌞 / 🌒</button></li>
+            <li class="dropdown">
+                <button>🎨</button>
+                <ul class="dropdown-content" id="color-options">
+                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.amber.min.css' %}">
+                        <span class="color-pick-color" style="background-color: #FFBF00;"></span>
+                    </button></li>
+                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.blue.min.css' %}">
+                        <span class="color-pick-color" style="background-color: #1D59D0;"></span>
+                    </button></li>
+                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.green.min.css' %}">
+                        <span class="color-pick-color" style="background-color: #2C6C0C;"></span>
+                    </button></li>
+                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.sand.min.css' %}">
+                        <span class="color-pick-color" style="background-color: #CCC6B4;"></span>
+                    </button></li>
+                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.zinc.min.css' %}">
+                        <span class="color-pick-color" style="background-color: #5C6370;"></span>
+                    </button></li>
+                </ul>
+            </li>
+
             {% if user.is_authenticated %}
             <span class="">Logged in as {{ user.username }} |</span>
                 <li class="">
                     <form method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
-                        <button type="submit" class="">Logout</button>
+                        <button type="submit" class='button-small'>Logout</button>
                     </form>
                 </li>
             {% else %}
                 <li class="">
                     <form method="post" action="{% url 'login' %}">
                         {% csrf_token %}
-                        <button type="submit" class="">Login</button>
+                        <button type="submit" class='button-small'>Login</button>
                     </form>
                 </li>
             {% endif %}
@@ -110,6 +168,9 @@
         {% block content %}
         {% endblock content %}
     </div>
+
+<script src="{% static 'scripts/script.js' %}"></script>
+
 
 </body>
 </html>

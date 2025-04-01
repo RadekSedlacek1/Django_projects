@@ -6,65 +6,78 @@
 
 {% block css_files %}    
     <link rel="stylesheet" href="{% static 'main/styles/payment.css' %}">
-{% endblock css_files %}
-
-{% block title %}List od payments
-{% endblock title %}
-
-{% block page_title %} Payments overview of {{ user.username }}
-{% endblock page_title %}
-
+    {% endblock css_files %}
+    
+    {% block title %}List od payments
+    {% endblock title %}
+    
+    {% block page_title %} Payments overview of {{ user.username }}
+    {% endblock page_title %}
+    
 {% block content %}
+    
+    <form method="post" action="{% url 'payment_add' %}">
+        {% csrf_token %}
+        <button type="submit" class='button-small'>New payment</button>
+    </form>
 
-{% for payment in payments %}
+    <div class='card-container'>
 
-<div class="card">
+        {% for payment in payments %}
 
-    <div class="card-header">
-        <strong> {{ payment.name }}</strong>
-        <p> Payment owner: {{payment.user}} </p>
-        <hr>
+        <div class="card">
+
+            <div class='card-header'>
+                <div class='left-group'><h3> {{ payment.name }}</h3></div>
+            </div>
+            
+            <div class='divider'></div>
+
+            <div class='card-body'>
+                <div class='card-desc'>
+                    <p>{{ payment.desc}}</p>
+                </div>
+            </div>
+            
+            <div class='divider'></div>
+
+                <div class='card-footer'>
+                    
+                    <div class='left-group'>
+                        <table>
+                            <tr>
+                                <td>Payment owner:</td>
+                                <td>{{payment.user}}</td>
+                            </tr>
+                            <tr>
+                                <td>created at:</td>
+                                <td>{{payment.created_at}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class='right-group'>
+
+                        {% if user == payment.user%}
+                            <form method='post'>
+                                {% csrf_token %}
+                                <button type='submit' class='button-small custom-warning' name='payment-delete' value='{{ payment.id }}'>
+                                    Delete this payment
+                                </button>
+                            </form>
+                            {% endif %}
+                            
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% empty %}
+
+        <p>So far there is no payment connected to your name, start by creating one.</p>
+
+        {% endfor %}
     </div>
 
-    <div class="card-body d-flex flex-row justify-content-between">
-        <div>
-            <p>{{ payment.desc}}</p>
-        </div>
-    </div>
-
-    <div class="card-footer text-muted">
-
-        <div>
-            {{payment.created_at}}
-        </div>
-
-        <div>
-            {% if user == payment.user%}
-                <form method="post">
-                    {% csrf_token %}
-                    <button 
-                    type="submit"
-                    class=""
-                    name="payment-id"
-                    value="{{ payment.id }}">
-                        Delete this payment
-                    </button>
-                </form>
-            {% endif %}
-
-        </div>
-    </div>
-</div>
-
-{% empty %}
-
-<p>So far there is no payment connected to your name, start by creating one.</p>
-
-{% endfor %}
-
-<form method="post" action="{% url 'payment_add' %}">
-    {% csrf_token %}
-    <button type="submit" class="">New payment</button>
-</form>
 
 {% endblock content %}

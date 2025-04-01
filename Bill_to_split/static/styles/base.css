@@ -3,6 +3,8 @@
 * {
     margin: 0;
     padding: 0;
+    max-width: 1600px;
+    margin: 0 auto;
 }
 
 .nav_left {
@@ -15,6 +17,7 @@
 
 .h1_title {
     padding-left: 45px;
+    margin-top: 40px;
 }
 
 .content {
@@ -22,6 +25,118 @@
     padding-right: 30px;
 }
 
-button {
+.button-small {
     padding: 10px 15px !important;
+    margin: 0 !important;
+    width: auto !important;
 }
+
+.card-container {
+    max-height: 80vh;
+    overflow-y: auto;
+    margin-top: 20px;
+}
+
+.card {
+    border: 2px solid var(--pico-primary);
+    border-radius: 10px;
+    max-width: 90vh;
+    margin: 30px auto;
+    padding: 10px 30px;
+
+}
+.card p, h3 {
+    margin: 0;
+
+}
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    height: 50px;
+    align-items: center;
+}
+
+.left-group {
+    text-align: left;
+    margin-left: 10px;
+}
+
+.right-group {
+    text-align: right;
+    margin-right: 10px;
+}
+
+.card-body {
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.card-desc {
+    align-items: center;
+    margin: 10px;
+    text-align: justify;
+    max-height: 8em;
+}
+
+.card-footer {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+.divider {
+    border-top: 1px solid var(--pico-secondary);
+    margin: 10px 0;
+}
+
+table, th, td {
+    padding: 5px;
+    margin: 0;
+    border-bottom: none;
+    width: 100%; /* Přizpůsobí šířku tabulky rodiči */
+    table-layout: fixed; /* Zabrání roztažení jednotlivých sloupců */
+    word-wrap: break-word; /* Umožní zalamování textu ve sloupcích */
+    width: 100%;
+    table-layout: auto; /* Přirozená šířka sloupců */
+}
+
+.custom-warning {
+    background-color: #72170F;
+    color: var(--pico-tertiary)
+}
+
+.color-pick-color {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border-radius: 0px;
+}
+
+.color-pick-button {
+    width: 40px;   /* Nastaví šířku tlačítka */
+    height: 40px;  /* Nastaví výšku tlačítka */
+    padding: 0;    /* Odstraní případné vnitřní odsazení */
+    border: none;  /* Pokud má tlačítko okraje, můžeš je také odstranit */
+    display: flex; /* Umožní lepší zarovnání obsahu */
+    justify-content: center; /* Zarovná obsah horizontálně */
+    align-items: center; /* Zarovná obsah vertikálně */
+}
+
+
+/* 
+pico colors:
+
+--pico-primary
+--pico-secondary
+--pico-tertiary
+--pico-success
+--pico-warning
+--pico-error
+--pico-background
+--pico-contrast
+--pico-muted
+--pico-border
+--pico-mark
+*/

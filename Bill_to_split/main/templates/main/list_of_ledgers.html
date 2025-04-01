@@ -1,11 +1,11 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% comment %} list of ledgers of user for aplication main in project Bill_to_split {% endcomment %}
 
 {% load static %}
 
 {% block css_files %}    
-    <link rel="stylesheet" href="{% static 'main/styles/ledger.css' %}">
+    <link rel='stylesheet' href='{% static 'main/styles/ledger.css' %}'>
 {% endblock css_files %}
 
 {% block title %}List od ledgers
@@ -16,55 +16,67 @@
 
 {% block content %}
 
-    {% for ledger in ledgers %}
-
-        <div class="card">
-
-            <div class="card-header">
-                <strong> {{ ledger.name }}</strong>
-                <p> Ledger owner: {{ledger.user}} </p>
-                <hr>
-            </div>
-
-            <div class="card-body d-flex flex-row justify-content-between">
-                <div>
-                    <p>{{ ledger.desc}}</p>
-                </div>
-            </div>
-
-            <div class="card-footer text-muted">
-
-                <div>
-                    {{ledger.created_at}}
-                </div>
-
-                <div>
-                    {% if user == ledger.user%}
-                        <form method="post">
-                            {% csrf_token %}
-                            <button 
-                            type="submit"
-                            class=""
-                            name="ledger-id"
-                            value="{{ ledger.id }}">
-                                Delete this ledger
-                            </button>
-                        </form>
-                    {% endif %}
-
-                </div>
-            </div>
-        </div>
-
-    {% empty %}
-
-        <p>So far there is no ledger connected to your name, start by creating one.</p>
-
-    {% endfor %}
-
-    <form method="post" action="{% url 'ledger_add' %}">
+    <form method='post' action='{% url 'ledger_add' %}'>
         {% csrf_token %}
-        <button type="submit" class="">New ledger</button>
+        <button type='submit' class='button-small'>Create new ledger</button>
     </form>
 
+    <div class='card-container'>
+    
+        {% for ledger in ledgers %}
+
+
+            <div class='card'>
+                
+                <div class='card-header'>
+                    <div class='left-group'><h3> {{ ledger.name }}</h3></div>
+                </div>
+                
+                <div class='divider'></div>
+                
+                <div class='card-body'>
+                    <div class='card-desc'>
+                        <p>{{ ledger.desc}}</p>
+                    </div>
+                </div>
+                
+                <div class='divider'></div>
+                
+                <div class='card-footer'>
+                    
+                    <div class='left-group'>
+                        <table>
+                            <tr>
+                                <td>Ledger owner:</td>
+                                <td>{{ledger.user}}</td>
+                            </tr>
+                            <tr>
+                                <td>created at:</td>
+                                <td>{{ledger.created_at}}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class='right-group'>
+                        {% if user == ledger.user%}
+                            <form method='post'>
+                                {% csrf_token %}
+                                <button type='submit' class='button-small custom-warning' name='ledger-delete' value='{{ ledger.id }}'>
+                                    Delete this ledger
+                                </button>
+                            </form>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                </div>
+                
+        {% empty %}
+                
+        <p>So far there is no ledger connected to your name, start by creating one.</p>
+                
+        {% endfor %}
+
+    </div>
+            
 {% endblock content %}

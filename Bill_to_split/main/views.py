@@ -45,7 +45,7 @@ def sign_up(request):
 @login_required(login_url='/login')
 def list_of_ledgers(request):
     if request.method == 'POST':                                    # when from template returns POST
-        ledger_id = request.POST.get('ledger-id')                   # take the id form the template
+        ledger_id = request.POST.get('ledger-delete')                   # take the id form the template
         if ledger_id:                                               # do the rest only if you have id to delete
             ledger = Ledger.objects.filter(id=ledger_id).first()    # take this ledger from the db
             print(f"{ledger} deleted")                              # must be before delete, after deletion there is no ID anymore
@@ -81,7 +81,7 @@ def ledger_edit(request):
 def list_of_payments(request):
     
     if request.method == 'POST':                                      # when from template returns POST
-        payment_id = request.POST.get('payment-id')                   # take the id form the template
+        payment_id = request.POST.get('payment-delete')               # take the id form the template
         if payment_id:                                                # do the rest only if you have id to delete
             payment = Payment.objects.filter(id=payment_id).first()   # take this ledger from the db
             print(f"{payment} deleted")                               # must be before delete, after deletion there is no ID anymore
