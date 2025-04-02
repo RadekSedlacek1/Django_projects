@@ -22,9 +22,8 @@
     </form>
 
     <div class='card-container'>
-    
-        {% for ledger in ledgers %}
 
+        {% for ledger in ledgers %}
 
             <div class='card'>
                 
@@ -45,14 +44,14 @@
                 <div class='card-footer'>
                     
                     <div class='left-group'>
-                        <table>
+                        <table class='card-table'>
                             <tr>
-                                <td>Ledger owner:</td>
-                                <td>{{ledger.user}}</td>
+                                <td class='card-table-td1'>Ledger owner:</td>
+                                <td class='card-table-td2'>{{ledger.user}}</td>
                             </tr>
                             <tr>
-                                <td>created at:</td>
-                                <td>{{ledger.created_at}}</td>
+                                <td class='card-table-td1'>created at:</td>
+                                <td class='card-table-td2'>{{ledger.creation_time|date:"F j Y"}}, {{ledger.creation_time|time:"H:i" }}</td>
                             </tr>
                         </table>
                     </div>
@@ -69,12 +68,12 @@
 
                         </div>
                     </div>
-                </div>
-                
+            </div>
+
         {% empty %}
-                
+
         <p>So far there is no ledger connected to your name, start by creating one.</p>
-                
+
         {% endfor %}
 
     </div>

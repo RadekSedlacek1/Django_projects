@@ -27,37 +27,40 @@
 
         <div class="card">
 
-            <div class='card-header'>
-                <div class='left-group'><h3> {{ payment.name }}</h3></div>
-            </div>
-            
-            <div class='divider'></div>
+            <details>
+                <summary>
+                    <div class='card-header'>
+                        <div class='left-group'><h3> {{ payment.name }}</h3></div>
+                    </div>
+                </summary>
 
-            <div class='card-body'>
-                <div class='card-desc'>
-                    <p>{{ payment.desc}}</p>
+                <div class='car'>
+                <div class='divider'></div>
+
+                <div class='card-body'>
+                    <div class='card-desc'>
+                        <p>{{ payment.desc}}</p>
+                    </div>
                 </div>
-            </div>
-            
-            <div class='divider'></div>
+
+                <div class='divider'></div>
 
                 <div class='card-footer'>
                     
                     <div class='left-group'>
-                        <table>
+                        <table class='card-table'>
                             <tr>
-                                <td>Payment owner:</td>
-                                <td>{{payment.user}}</td>
+                                <td class='card-table-td1'>Payment owner:</td>
+                                <td class='card-table-td2'>{{payment.user}}</td>
                             </tr>
                             <tr>
-                                <td>created at:</td>
-                                <td>{{payment.created_at}}</td>
+                                <td class='card-table-td1'>created at:</td>
+                                <td class='card-table-td2'>{{payment.payment_time|date:"F j Y"}}, {{payment.payment_time|time:"H:i" }}</td>
                             </tr>
                         </table>
                     </div>
-                    
-                    <div class='right-group'>
 
+                    <div class='right-group'>
                         {% if user == payment.user%}
                             <form method='post'>
                                 {% csrf_token %}
@@ -69,8 +72,9 @@
                             
                     </div>
                 </div>
-            </div>
+            </details>
         </div>
+
 
         {% empty %}
 

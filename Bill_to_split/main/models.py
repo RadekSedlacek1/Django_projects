@@ -27,6 +27,7 @@ class AbstractBase(models.Model):
 # meaning of user - is the creator and owner of the Ledger, can edit all entries in the ledger
 class Ledger(AbstractBase):
     user = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name ="Ledger creator and owner")
+    creation_time = models.DateTimeField(default=now, verbose_name ="Time of creation of this ledger")
     def get_absolute_url(self):
         return reverse('main:ListOfLedgersView', kwargs={'pk': self.pk, 'slug': self.slug})
 

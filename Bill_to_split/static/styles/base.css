@@ -48,6 +48,14 @@
 .card p, h3 {
     margin: 0;
 
+.summary::after {
+    content: " ⮟"; /* Přidá šipku dolů */
+    margin: 0;
+    padding:0;
+    float: left;
+    color: var(--pico-primary);
+}
+
 }
 .card-header {
     display: flex;
@@ -91,20 +99,35 @@
     margin: 10px 0;
 }
 
-table, th, td {
-    padding: 5px;
+.card-table {
+    width: 7rem;
+    padding: 0;
     margin: 0;
     border-bottom: none;
-    width: 100%; /* Přizpůsobí šířku tabulky rodiči */
-    table-layout: fixed; /* Zabrání roztažení jednotlivých sloupců */
-    word-wrap: break-word; /* Umožní zalamování textu ve sloupcích */
-    width: 100%;
-    table-layout: auto; /* Přirozená šířka sloupců */
+    table-layout: fixed; /* Pevná šířka sloupců */
+    border-collapse: collapse; /* Sjednocení okrajů buněk */
 }
 
+.card-table.tr, td {
+    padding: 0;
+    margin: 0;
+    text-align: left; /* Zarovnání textu */
+    border-bottom: none;
+}
+
+.card-table-td1 {
+    width: 8rem; /* Pevná šířka prvního sloupce */
+}
+
+.card-table-td2 {
+    width: 15rem; /* Pevná šířka druhého sloupce */
+}
+
+
+
 .custom-warning {
-    background-color: #72170F;
-    color: var(--pico-tertiary)
+    background-color: #c01000;
+    color: #f0f0f0;
 }
 
 .color-pick-color {
