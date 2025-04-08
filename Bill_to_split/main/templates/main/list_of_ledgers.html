@@ -26,50 +26,116 @@
         {% for ledger in ledgers %}
 
             <div class='card'>
-                
                 <div class='card-header'>
-                    <div class='left-group'><h3> {{ ledger.name }}</h3></div>
-                </div>
-                
-                <div class='divider'></div>
-                
-                <div class='card-body'>
-                    <div class='card-desc'>
-                        <p>{{ ledger.desc}}</p>
-                    </div>
-                </div>
-                
-                <div class='divider'></div>
-                
-                <div class='card-footer'>
-                    
-                    <div class='left-group'>
-                        <table class='card-table'>
+
+                    <table>
+                        <thead>
                             <tr>
-                                <td class='card-table-td1'>Ledger owner:</td>
-                                <td class='card-table-td2'>{{ledger.user}}</td>
+                                <th class='left-group'>
+
+                                    <h3>{{ ledger.name }}</h3>
+                                    
+                                </th>
+                                <th colspan="2" class='right-group'>
+
+                                        <form method='post'>
+                                            {% csrf_token %}
+                                            <button type='submit' class='button-small contrast' name='ledger-detail' value='{{ ledger.id }}'>
+                                                Details
+                                            </button>
+                                        </form>
+
+                                        <form method='post'>
+                                            {% csrf_token %}
+                                            <button type='submit' class='button-small contrast' name='new-payment' value='{{ ledger.id }}'>
+                                                New payment
+                                            </button>
+                                        </form>
+                                </th>
                             </tr>
-                            <tr>
-                                <td class='card-table-td1'>created at:</td>
-                                <td class='card-table-td2'>{{ledger.creation_time|date:"F j Y"}}, {{ledger.creation_time|time:"H:i" }}</td>
+                          </thead>
+
+                          <tbody>
+                              <tr>
+                                  <td>
+                                      <p>Your balance: {{ledger.user_balance}}</p>
+                                  </td>
                             </tr>
+                          </tbody>
+                    </table>
+                </div>
+
+                <details>
+                    <summary>
+                        <p>
+                            Quick overview
+                        </p>
+                    </summary>
+
+                    <div class='divider-first'></div>
+
+                    <div class='card-body'>
+
+                        <table>
+                            <thead>
+                              <tr>
+                                <th>name</th>
+                                <th>balance</th>
+                                <th>ledger description</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                                {% for name, value in ledger.balances.items %}
+                                    <tr>
+                                        <td class='card-table-td1'>{{ name }}:</td>
+                                        <td class='card-table-td2'>{{ value }}</td>
+                                    {% if forloop.first %}
+                                        <td rowspan="{{ rows|length }}">{{ ledger.desc}}</td>
+                                    {% endif %}
+                                    </tr>
+                                {% empty %}
+                                    <p>No payments in this ledger yet.</p>
+                                {% endfor %}
+                                    <tr class='empty'>
+                                        <td>empty<td>
+                                    </tr>
+                            </tbody>
                         </table>
+
                     </div>
 
-                    <div class='right-group'>
-                        {% if user == ledger.user%}
-                            <form method='post'>
-                                {% csrf_token %}
-                                <button type='submit' class='button-small custom-warning' name='ledger-delete' value='{{ ledger.id }}'>
-                                    Delete this ledger
-                                </button>
-                            </form>
-                            {% endif %}
+                    <div class='divider'></div>
 
+                    <div class='card-footer'>
+
+                        <div class='left-group'>
+                            <table class='card-table'>
+                                <tr>
+                                    <td class='card-table-td1'>Ledger owner:</td>
+                                    <td class='card-table-td2'>{{ledger.user}}</td>
+                                </tr>
+                                <tr>
+                                    <td class='card-table-td1'>Ledger created:</td>
+                                    <td class='card-table-td2'>{{ledger.creation_time|date:"F j Y"}}, {{ledger.creation_time|time:"H:i" }}</td>
+                                </tr>
+                            </table>
                         </div>
-                    </div>
-            </div>
 
+                        <div class='right-group'>
+                            {% if user == ledger.user%}
+                                <form method='post'>
+                                    {% csrf_token %}
+                                    <button type='submit' class='button-small custom-warning' name='ledger-delete' value='{{ ledger.id }}'>
+                                        Delete this ledger
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                </details>
+            </div>
         {% empty %}
 
         <p>So far there is no ledger connected to your name, start by creating one.</p>

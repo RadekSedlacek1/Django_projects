@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from .models import Ledger, Payment, PaymentBalance
 from .forms import UserRegisterForm, LedgerForm, PaymentForm, PaymentBalanceForm
 from django.forms import inlineformset_factory
+from django.db.models import Q, Sum
 
 
 import pprint # for testing only
@@ -45,14 +46,48 @@ def sign_up(request):
 @login_required(login_url='/login')
 def list_of_ledgers(request):
     if request.method == 'POST':                                    # when from template returns POST
-        ledger_id = request.POST.get('ledger-delete')                   # take the id form the template
-        if ledger_id:                                               # do the rest only if you have id to delete
-            ledger = Ledger.objects.filter(id=ledger_id).first()    # take this ledger from the db
-            print(f"{ledger} deleted")                              # must be before delete, after deletion there is no ID anymore
-            ledger.delete()
-        
-    ledgers = Ledger.objects.all()
+        if 'ledger-delete' in request.POST:
+            ledger_id = request.POST.get('ledger-delete')               # take the id form the template
+            if ledger_id:                                               # do the rest only if you have id to delete
+                ledger = Ledger.objects.filter(id=ledger_id).first()    # take this ledger from the db
+                print(f"{ledger} deleted")                              # must be before delete, after deletion there is no ID anymore
+                ledger.delete()
+                
+        if 'ledger-detail' in request.POST:
+            ledger_id = request.POST.get('ledger-detail')               # take the id form the template
+            if ledger_id:                                               # do the rest only if you have id to go to
+                return redirect('ledger_detail', ledger_pk=ledger_id)
+            
+        if 'new-payment' in request.POST:
+            ledger_id = request.POST.get('new-payment')               # take the id form the template
+            if ledger_id:                                               # do the rest only if you have id to go to
+                pass
+
+    user = request.user
+    ledgers = Ledger.objects.filter(
+        Q(payment__paymentbalance__user=user)
+    ).distinct()
+
+    for ledger in ledgers:
+        balances = PaymentBalance.objects.filter(
+            payment__ledger=ledger                                  # Take all payments and balances
+        ).values('user__username').annotate(
+            total_balance=Sum('balance')
+        )
+
+        ledger.user_balance = 0
+        ledger.balances = {}
+        # Make sum of all entries for each user
+        for b in balances:
+            if b['user__username'] == user.username:                
+                ledger.user_balance = b['total_balance']
+            else:
+                ledger.balances[b['user__username']] = b['total_balance']
+
     return render(request, 'main/list_of_ledgers.html', {'ledgers':ledgers})
+
+
+
 
 @login_required(login_url='/login')
 def ledger_add(request):
@@ -68,11 +103,24 @@ def ledger_add(request):
     return render(request, 'main/ledger_add.html', {'form': form})
 
 @login_required(login_url='/login')
-def ledger_detail(request):
-    return render(request, 'main/ledger_detail.html', {})
+def ledger_detail(request, ledger_pk):
+    ledger = Ledger.objects.get(id=ledger_pk)
+    payments = Payment.objects.filter(ledger=ledger)
+    balances = PaymentBalance.objects.filter(payment__in=payments).select_related('user')
+    user_balances = balances.values('user__username').annotate(total_balance=Sum('balance'))
+    user = request.user
+
+                
+    return render(request, 'main/ledger_detail.html', {
+        'ledger': ledger,
+        'payments': payments,
+        'balances': balances,
+        'user_balances': user_balances,
+    })
 
 @login_required(login_url='/login')
 def ledger_edit(request):
+    
     return render(request, 'main/ledger_edit.html', {})
 
 ##############################    Payment related views    ##############################

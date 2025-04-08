@@ -1,1 +1,142 @@
-/* ledger css for project Bill_to_split */    
+/* ledger css for project Bill_to_split */
+.card-container {
+    max-height: 70vh;
+    max-width: 100vh;
+    overflow-y: auto;
+    padding-right: 10px;
+    margin-top: 20px;
+}
+
+.card {
+    border: 2px solid var(--pico-primary);
+    border-radius: 10px;
+    max-width: 90vh;
+    margin: 30px auto;
+    padding: 10px 5px;
+    background-color: color-mix(in srgb, rgba(125, 125, 125, 0.071), var(--pico-primary) 10%);
+}
+.card p {
+    margin: 10px 0px;
+}
+
+.card h3 {
+    margin: 30px 10px 20px 0px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    height: 5rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.left-group {
+    text-align: left;
+    margin-left: 10px;
+}
+
+.right-group {
+    text-align: right;
+    margin-right: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    padding: 0;
+}
+
+.right-group ul{
+    padding: 0px 10px 10px 10px;
+    margin: 0px;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: row;
+}
+
+.card-body,h5 {
+    margin-left: 0px;
+    margin-bottom: 10px;
+    padding-left: 0;
+    text-align: left;
+}
+
+.card-content-left {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: 9em;
+    margin: 10px;
+    width: 20vh;
+}
+
+.card-content-right {
+    text-align: justify;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: 8em;
+    margin: 10px;
+    padding-right: 10px;
+    width: 70vh;
+}
+
+.card-footer {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+.divider-first {
+    border-top: 1px solid var(--pico-secondary);
+    margin: 55px 5px 5px 5px;
+}
+
+.divider {
+    border-top: 1px solid var(--pico-secondary);
+    margin: 5px;
+}
+
+.card-table {
+    width: 7rem;
+    padding: 0;
+    margin: 0;
+    border-bottom: none;
+    table-layout: fixed; /* Pevná šířka sloupců */
+    border-collapse: collapse; /* Sjednocení okrajů buněk */
+}
+
+.card-table.tr, td {
+    padding: 0;
+    margin: 0;
+    text-align: left; /* Zarovnání textu */
+    border-bottom: none;
+    background-color: inherit;
+}
+
+.card-table-td1 {
+    width: 8rem; /* Pevná šířka prvního sloupce */
+}
+
+.card-table-td2 {
+    width: 15rem; /* Pevná šířka druhého sloupce */
+}
+
+details summary::after {
+    width: 1.5rem;
+    height: 1.5rem;
+    float: left;
+    content: "";
+    transform: rotate(0);
+    margin-left: 0px;
+    background-size: 1.5rem auto;
+}
+
+summary {
+    margin-left: 10px;
+    margin-bottom: 30px;
+}
+

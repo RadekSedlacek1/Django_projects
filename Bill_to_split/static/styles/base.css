@@ -7,6 +7,18 @@
     margin: 0 auto;
 }
 
+.top_navbar {
+    max-width: 110vh;
+}
+
+body {
+    max-width: 150vh;
+}
+
+.h1_title {
+    max-width: 110vh;
+}
+
 .nav_left {
     padding-left: 30px;
 }
@@ -20,110 +32,17 @@
     margin-top: 40px;
 }
 
-.content {
-    padding-left: 30px;
-    padding-right: 30px;
-}
-
 .button-small {
     padding: 10px 15px !important;
     margin: 0 !important;
     width: auto !important;
 }
 
-.card-container {
-    max-height: 80vh;
-    overflow-y: auto;
-    margin-top: 20px;
+.content {
+    padding-left: 30px;
+    padding-right: 30px;
+    max-width: 110vh;
 }
-
-.card {
-    border: 2px solid var(--pico-primary);
-    border-radius: 10px;
-    max-width: 90vh;
-    margin: 30px auto;
-    padding: 10px 30px;
-
-}
-.card p, h3 {
-    margin: 0;
-
-.summary::after {
-    content: " ⮟"; /* Přidá šipku dolů */
-    margin: 0;
-    padding:0;
-    float: left;
-    color: var(--pico-primary);
-}
-
-}
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    height: 50px;
-    align-items: center;
-}
-
-.left-group {
-    text-align: left;
-    margin-left: 10px;
-}
-
-.right-group {
-    text-align: right;
-    margin-right: 10px;
-}
-
-.card-body {
-    overflow-y: auto;
-    padding-right: 10px;
-}
-
-.card-desc {
-    align-items: center;
-    margin: 10px;
-    text-align: justify;
-    max-height: 8em;
-}
-
-.card-footer {
-    align-items: center;
-    display: flex;
-    justify-content: space-between;
-    overflow-x: auto;
-    max-width: 100%;
-}
-
-.divider {
-    border-top: 1px solid var(--pico-secondary);
-    margin: 10px 0;
-}
-
-.card-table {
-    width: 7rem;
-    padding: 0;
-    margin: 0;
-    border-bottom: none;
-    table-layout: fixed; /* Pevná šířka sloupců */
-    border-collapse: collapse; /* Sjednocení okrajů buněk */
-}
-
-.card-table.tr, td {
-    padding: 0;
-    margin: 0;
-    text-align: left; /* Zarovnání textu */
-    border-bottom: none;
-}
-
-.card-table-td1 {
-    width: 8rem; /* Pevná šířka prvního sloupce */
-}
-
-.card-table-td2 {
-    width: 15rem; /* Pevná šířka druhého sloupce */
-}
-
-
 
 .custom-warning {
     background-color: #c01000;

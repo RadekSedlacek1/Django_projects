@@ -11,11 +11,53 @@
 {% block title %}Ledger detail
 {% endblock title %}
 
-{% block page_title %} This page is for detail look of a ledger
+{% block page_title %} This page is for detail look of a ledger {{ ledger.name }}
 {% endblock page_title %}
 
 {% block content %}
 
+<h1>Ledger: {{ ledger.name }}</h1>
 
+<h2>Uživatelé a jejich celkový balance</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Uživatel</th>
+      <th>Balance</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in user_balances %}
+      <tr>
+        <td>{{ item.user__username }}</td>
+        <td>{{ item.total_balance }}</td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="2">Žádné záznamy</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>Všechny platby</h2>
+{% for payment in payments %}
+  <div>
+    <strong>{{ payment.name }}</strong> – {{ payment.cost }} Kč <br>
+    <small>Datum: {{ payment.entry_time }}</small> <br>
+    <small>Datum: {{ payment.payment_time }}</small>
+
+    <h4>Rozdělení (PaymentBalances):</h4>
+    <ul>
+      {% for balance in balances %}
+        {% if balance.payment.id == payment.id %}
+          <li>{{ balance.user.username }}: {{ balance.balance }} Kč</li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+{% empty %}
+  <p>Žádné platby</p>
+{% endfor %}
 
 {% endblock content %}

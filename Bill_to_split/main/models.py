@@ -28,6 +28,7 @@ class AbstractBase(models.Model):
 class Ledger(AbstractBase):
     user = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name ="Ledger creator and owner")
     creation_time = models.DateTimeField(default=now, verbose_name ="Time of creation of this ledger")
+    
     def get_absolute_url(self):
         return reverse('main:ListOfLedgersView', kwargs={'pk': self.pk, 'slug': self.slug})
 
@@ -39,6 +40,7 @@ class Payment(AbstractBase):
     entry_time = models.DateTimeField(default=now, verbose_name ="Time of this entry")
     payment_time = models.DateTimeField(default=now, verbose_name ="Time of payment")
     cost = models.DecimalField(max_digits=10, decimal_places=2, verbose_name ="Total cost of the payment")
+    
     def get_absolute_url(self):
         return reverse('main:PaymentDetailView', kwargs={'pk': self.pk, 'slug': self.slug})
     
@@ -50,3 +52,6 @@ class PaymentBalance(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     payment = models.ForeignKey(Payment, on_delete=models.PROTECT)
     balance = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    def __str__(self):  
+        return f"Payment balance, ID: {self.pk}, {self.payment.name}, {self.user}: {self.balance}"
