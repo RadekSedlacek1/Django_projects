@@ -47,24 +47,56 @@ body {
 .custom-warning {
     background-color: #c01000;
     color: #f0f0f0;
+    border: none;
+}
+
+.dropdown-content {
+}
+
+.dropdown-content li {
+    padding: 0px 10px 0px 10px !important;
+    margin: 5px !important;
+    width: 40px;
+    height: 40px;
+}
+
+#color-options {
+    display: none;
+    position: absolute !important;
+    gap: 0px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+#color-options.show {
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    width: 360px;
+    height: 270px;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .color-pick-color {
-    display: inline-block;
-    width: 40px;
-    height: 40px;
-    border-radius: 0px;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .color-pick-button {
-    width: 40px;   /* Nastaví šířku tlačítka */
-    height: 40px;  /* Nastaví výšku tlačítka */
-    padding: 0;    /* Odstraní případné vnitřní odsazení */
-    border: none;  /* Pokud má tlačítko okraje, můžeš je také odstranit */
-    display: flex; /* Umožní lepší zarovnání obsahu */
-    justify-content: center; /* Zarovná obsah horizontálně */
-    align-items: center; /* Zarovná obsah vertikálně */
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 5px;
+    border: none;
+    display: flex;
+    align-items: center !important;
+    justify-content: center !important;
 }
+
 
 
 /* 

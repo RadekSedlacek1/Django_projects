@@ -1,4 +1,28 @@
-/* ledger css for project Bill_to_split */
+/* ledger_detail css for project Bill_to_split */
+
+.ledger-overview {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ledger-overview *{
+    padding: 0px;
+    margin: 0px;
+    border-bottom: none;
+}
+
+.balances-table {
+    border: 2px solid var(--pico-primary);
+    border-radius: 10px;
+    padding: 10px 10px;
+    background-color: color-mix(in srgb, rgba(125, 125, 125, 0.05), var(--pico-primary) 15%);
+}
+
+.balances-table thead {
+    background-color: color-mix(in srgb, rgba(125, 125, 125, 0.05), var(--pico-primary) 15%);
+}
+
 .card-container {
     max-height: 75vh;
     max-width: 100vh;
@@ -12,9 +36,9 @@
     max-width: 90vh;
     margin: 30px auto;
     padding: 10px 5px;
-    background-color: color-mix(in srgb, rgba(125, 125, 125, 0.071), var(--pico-primary) 10%);
-
+    background-color: color-mix(in srgb, rgba(125, 125, 125, 0.05), var(--pico-primary) 15%);
 }
+
 .card *{
     padding: 0px;
     margin: 0px;
@@ -25,9 +49,8 @@
     border-radius: 10px;
     display: flex;
     justify-content: space-between;
-    height: 5rem;
+    height: 8rem;
     align-items: center;
-    justify-content: center;
     background-color: inherit;
     padding-left: 10px;
 }
@@ -39,11 +62,18 @@
 }
 
 .card-name {
-    background-color: inherit;
+    width: 10rem;
+
+}.card-name h3 {
+    color: var(--pico-contrast);
 }
 
-.card-name h3 {
-    color: var(--pico-contrast);
+.column-1 {
+    width: 11rem;
+}
+
+.column-2 {
+    width: 11rem;
 }
 
 .card-buttons {
@@ -86,13 +116,11 @@ details summary::after {
 }
 
 .body-table{
-    width: 15rem;
     border-collapse: collapse;
     margin: 0;
     overflow-y: auto;
     overflow-x: auto;
-    height: 15rem;
-    width: 10rem;
+    height: 10rem;
 }
 
 .body-text{
@@ -121,13 +149,6 @@ details summary::after {
     margin-left: 10px !important;
 }
 
-.card-table-td1 {
-    width: 8rem; /* Pevná šířka prvního sloupce */
-}
-
-.card-table-td2 {
-    width: 15rem; /* Pevná šířka druhého sloupce */
-}
 
 .buttons-right {
     margin-right: 10px !important;

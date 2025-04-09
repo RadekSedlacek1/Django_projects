@@ -4,60 +4,161 @@
 
 {% load static %}
 
-{% block css_files %}    
-    <link rel="stylesheet" href="{% static 'main/styles/ledger.css' %}">
+{% block css_files %}
+    <link rel="stylesheet" href="{% static 'main/styles/Ledger_detail.css' %}">
 {% endblock css_files %}
 
 {% block title %}Ledger detail
 {% endblock title %}
 
-{% block page_title %} This page is for detail look of a ledger {{ ledger.name }}
+{% block page_title %} Details of the ledger {{ ledger.name }}
 {% endblock page_title %}
 
 {% block content %}
 
-<h1>Ledger: {{ ledger.name }}</h1>
+<form method='post'>
+    {% csrf_token %}
+        <button type='submit' class='button-small contrast' name='new-payment' value='{{ ledger.id }}'>
+            New payment
+        </button>
+</form>
 
-<h2>Uživatelé a jejich celkový balance</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Uživatel</th>
-      <th>Balance</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for item in user_balances %}
-      <tr>
-        <td>{{ item.user__username }}</td>
-        <td>{{ item.total_balance }}</td>
-      </tr>
-    {% empty %}
-      <tr>
-        <td colspan="2">Žádné záznamy</td>
-      </tr>
+<h3>Users balances:</h3>
+
+<div class='ledger-overview'> 
+    <div class='balances-table'>
+        <table>
+            <thead>
+                <tr>
+                    <th class='column-1'>User</th>
+                    <th class='column-2'>Total balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for balance in user_balances %}
+                    <tr>
+                        <td>{{ balance.user__username }}</td>
+                        <td>{{ balance.total_balance }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="2">Žádné záznamy</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class='graph'>
+        <p>Placeholder for a bar graph showing the user's balances</p>
+    </div>
+</div>
+
+<h3>Registred payments:</h3>
+
+<div class='card-container'>
+
+    {% for payment in payments %}
+
+        <div class='card'>
+
+            <div class='card-header'>
+                <table>
+                    <thead>
+                        <tr>
+                            <th colspan="2" class='card-name'>
+                                <h3>{{ payment.name }}</h3>
+                            </th>
+                            <th class='card-buttons'>
+                                <form method='post'>
+                                    {% csrf_token %}
+                                    <button type='submit' class='button-small contrast' name='payment-edit' value='{{ payment.id }}'>
+                                        Edit payment
+                                    </button>
+                                </form>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class='column-1'>
+                                Payment cost:
+                            </td>
+                            <td class='column-2'>
+                                {{payment.cost}}
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Your balance change:
+                            </td>
+                            <td>
+                                číslo{{ledger.user_balance}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class='divider'></div>
+
+            <div class='card-body'>
+                <div class='body-table'>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class='column-1'>User</th>
+                                <th class='column-2'>Balance change</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for balance in balances %}
+                                {% if balance.payment.id == payment.id %}
+                                    <tr>
+                                        <td>{{ balance.user.username }}:</td>
+                                        <td>{{ balance.balance }}</td>
+                                    </tr>
+                                {% endif %}
+                            {% empty %}
+                                <p>No balances in this payment.</p>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class='divider'></div>
+
+            <div class='card-footer'>
+                <div class='left-group'>
+                    <table class='footer-table'>
+                        <tr>
+                            <td class='column-1'>Payment registred:</td>
+                            <td class='column-2'>{{payment.entry_time|date:"F j Y"}}, {{payment.entry_time|time:"H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <td>Payment time:</td>
+                            <td>{{payment.payment_time|date:"F j Y"}}, {{payment.payment_time|time:"H:i" }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class='buttons-right'>
+                    {% if user == payment.user%}
+                        <form method='post'>
+                            {% csrf_token %}
+                            <button type='submit' class='button-small custom-warning' name='payment-delete' value='{{ ledger.id }}'>
+                                Delete this payment
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            
+        </div>
     {% endfor %}
-  </tbody>
-</table>
 
-<h2>Všechny platby</h2>
-{% for payment in payments %}
-  <div>
-    <strong>{{ payment.name }}</strong> – {{ payment.cost }} Kč <br>
-    <small>Datum: {{ payment.entry_time }}</small> <br>
-    <small>Datum: {{ payment.payment_time }}</small>
-
-    <h4>Rozdělení (PaymentBalances):</h4>
-    <ul>
-      {% for balance in balances %}
-        {% if balance.payment.id == payment.id %}
-          <li>{{ balance.user.username }}: {{ balance.balance }} Kč</li>
-        {% endif %}
-      {% endfor %}
-    </ul>
-  </div>
-{% empty %}
-  <p>Žádné platby</p>
-{% endfor %}
+</div>
 
 {% endblock content %}

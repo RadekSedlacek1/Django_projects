@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     console.log("JavaScript is loaded successfully!");
 
-    // dark / light mode switch
+    // theme switch
     document.getElementById("theme-toggle").addEventListener("click", function () {
         const html = document.documentElement;
         const currentTheme = html.getAttribute("data-theme") || "auto";
@@ -18,4 +18,22 @@ document.addEventListener("DOMContentLoaded", function () {
             localStorage.setItem("color-theme", selectedColor);
         });
     });
+
+    // === ⬇⬇⬇ Přidáno: ovládání dropdownu s barvami
+    const colorToggle = document.getElementById("color-toggle"); // 🎨 tlačítko
+    const colorOptions = document.getElementById("color-options"); // <ul> s barvami
+
+    if (colorToggle && colorOptions) {
+        colorToggle.addEventListener("click", function (e) {
+            e.stopPropagation();
+            colorOptions.classList.toggle("show");
+        });
+
+        // zavři, když klikneš mimo
+        document.addEventListener("click", function (e) {
+            if (!colorOptions.contains(e.target)) {
+                colorOptions.classList.remove("show");
+            }
+        });
+    }
 });
