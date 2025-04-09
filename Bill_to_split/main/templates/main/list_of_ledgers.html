@@ -5,7 +5,7 @@
 {% load static %}
 
 {% block css_files %}    
-    <link rel='stylesheet' href='{% static 'main/styles/ledger.css' %}'>
+    <link rel='stylesheet' href='{% static 'main/styles/list_of_ledgers.css' %}'>
 {% endblock css_files %}
 
 {% block title %}List od ledgers
@@ -31,97 +31,88 @@
                     <table>
                         <thead>
                             <tr>
-                                <th class='left-group'>
-
+                                <th class='card-name'>
                                     <h3>{{ ledger.name }}</h3>
-                                    
                                 </th>
-                                <th colspan="2" class='right-group'>
-
-                                        <form method='post'>
-                                            {% csrf_token %}
-                                            <button type='submit' class='button-small contrast' name='ledger-detail' value='{{ ledger.id }}'>
-                                                Details
-                                            </button>
-                                        </form>
-
-                                        <form method='post'>
-                                            {% csrf_token %}
-                                            <button type='submit' class='button-small contrast' name='new-payment' value='{{ ledger.id }}'>
-                                                New payment
-                                            </button>
-                                        </form>
+                                <th class='card-buttons'>
+                                    <form method='post'>
+                                        {% csrf_token %}
+                                        <button type='submit' class='button-small contrast' name='ledger-detail' value='{{ ledger.id }}'>
+                                            Details
+                                        </button>
+                                    </form>
+                                    <form method='post'>
+                                        {% csrf_token %}
+                                        <button type='submit' class='button-small contrast' name='new-payment' value='{{ ledger.id }}'>
+                                            New payment
+                                        </button>
+                                    </form>
                                 </th>
                             </tr>
-                          </thead>
+                        </thead>
 
-                          <tbody>
-                              <tr>
-                                  <td>
-                                      <p>Your balance: {{ledger.user_balance}}</p>
-                                  </td>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <p>Your balance: {{ledger.user_balance}}</p>
+                                </td>
                             </tr>
-                          </tbody>
+                        </tbody>
                     </table>
                 </div>
 
                 <details>
-                    <summary>
+                    <summary class='card-open-button'>
                         <p>
                             Quick overview
                         </p>
                     </summary>
-
-                    <div class='divider-first'></div>
-
+                    <br>
+                    <div class='divider'></div>
+                    <br>
                     <div class='card-body'>
-
-                        <table>
-                            <thead>
-                              <tr>
-                                <th>name</th>
-                                <th>balance</th>
-                                <th>ledger description</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                                {% for name, value in ledger.balances.items %}
+                        <div class='body-table'>
+                            <table>
+                                <thead>
                                     <tr>
-                                        <td class='card-table-td1'>{{ name }}:</td>
-                                        <td class='card-table-td2'>{{ value }}</td>
-                                    {% if forloop.first %}
-                                        <td rowspan="{{ rows|length }}">{{ ledger.desc}}</td>
-                                    {% endif %}
+                                        <th>User</th>
+                                        <th>Balance</th>
                                     </tr>
-                                {% empty %}
-                                    <p>No payments in this ledger yet.</p>
-                                {% endfor %}
-                                    <tr class='empty'>
-                                        <td>empty<td>
-                                    </tr>
-                            </tbody>
-                        </table>
-
+                                </thead>
+                                <tbody>
+                                    {% for name, value in ledger.balances.items %}
+                                        <tr>
+                                            <td>{{ name }}:</td>
+                                            <td>{{ value }}</td>
+                                        </tr>
+                                    {% empty %}
+                                        <p>No payments in this ledger yet.</p>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class='body-text'>
+                            <h3>ledger description</h3><br>
+                            <p>{{ ledger.desc}}</p>
+                        </div>
                     </div>
 
                     <div class='divider'></div>
 
                     <div class='card-footer'>
-
                         <div class='left-group'>
-                            <table class='card-table'>
+                            <table class='footer-table'>
                                 <tr>
                                     <td class='card-table-td1'>Ledger owner:</td>
                                     <td class='card-table-td2'>{{ledger.user}}</td>
                                 </tr>
                                 <tr>
-                                    <td class='card-table-td1'>Ledger created:</td>
-                                    <td class='card-table-td2'>{{ledger.creation_time|date:"F j Y"}}, {{ledger.creation_time|time:"H:i" }}</td>
+                                    <td>Ledger created:</td>
+                                    <td>{{ledger.creation_time|date:"F j Y"}}, {{ledger.creation_time|time:"H:i" }}</td>
                                 </tr>
                             </table>
                         </div>
-
-                        <div class='right-group'>
+                        <div class='buttons-right'>
                             {% if user == ledger.user%}
                                 <form method='post'>
                                     {% csrf_token %}
@@ -131,11 +122,10 @@
                                 </form>
                             {% endif %}
                         </div>
-
                     </div>
-
                 </details>
             </div>
+
         {% empty %}
 
         <p>So far there is no ledger connected to your name, start by creating one.</p>

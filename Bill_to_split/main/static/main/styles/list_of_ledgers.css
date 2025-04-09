@@ -1,0 +1,131 @@
+/* ledger css for project Bill_to_split */
+.card-container {
+    max-height: 70vh;
+    max-width: 100vh;
+    overflow-y: auto;
+    padding-right: 10px;
+    margin-top: 20px;
+}
+
+.card {
+    border: 2px solid var(--pico-primary);
+    border-radius: 10px;
+    max-width: 90vh;
+    margin: 30px auto;
+    padding: 10px 5px;
+    background-color: color-mix(in srgb, rgba(125, 125, 125, 0.071), var(--pico-primary) 10%);
+
+}
+.card *{
+    padding: 0px;
+    margin: 0px;
+    border-bottom: none;
+}
+
+.card-header {
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    height: 5rem;
+    align-items: center;
+    justify-content: center;
+    background-color: inherit;
+    padding-left: 10px;
+}
+
+.table tr, td, th {
+    text-align: left;
+    border-bottom: none;
+    background-color: inherit;
+}
+
+.card-name {
+    background-color: inherit;
+}
+
+.card-buttons {
+    display: flex;
+    flex-direction: row;
+    background-color: inherit;
+    align-items: center;
+    justify-content: right;
+}
+
+.card-buttons form button {
+    margin-right: 10px !important;
+}
+
+.card-open-button {
+    margin: 10px 0 20px 10px !important;
+}
+
+details summary::after {
+    width: 1.5rem;
+    height: 1.5rem;
+    float: left;
+    content: "";
+    transform: rotate(0);
+    margin-left: 0px;
+    background-size: 1.5rem auto;
+}
+
+.divider {
+    border-top: 1px solid var(--pico-secondary);
+    margin: 5px;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: row;
+    margin-left: 10px !important;
+    align-items: flex-start;
+    max-width: 100%;
+}
+
+.body-table{
+    width: 15rem;
+    border-collapse: collapse;
+    margin: 0;
+    overflow-y: auto;
+    overflow-x: auto;
+    height: 15rem;
+    width: 10rem;
+}
+
+.body-text{
+    flex-direction: column;
+    margin: 0 10px 0 10px;
+    overflow-y: auto;
+    height: 15rem;
+    padding: 10px;
+    flex: 1;
+    box-sizing: border-box;
+    text-align: justify;
+}
+
+.card-footer {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    max-width: 100%;
+}
+
+.footer-table {
+    width: 7rem;
+    border-bottom: none;
+    table-layout: fixed;
+    border-collapse: collapse;
+    margin-left: 10px !important;
+}
+
+.card-table-td1 {
+    width: 8rem; /* Pevná šířka prvního sloupce */
+}
+
+.card-table-td2 {
+    width: 15rem; /* Pevná šířka druhého sloupce */
+}
+
+.buttons-right {
+    margin-right: 10px !important;
+}
