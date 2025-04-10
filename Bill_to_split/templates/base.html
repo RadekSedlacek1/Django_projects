@@ -57,8 +57,6 @@
 </head>
 <body>
 
- 
-
     <nav class="top_navbar">
         <ul class="nav_left">
             <li class="">
@@ -76,16 +74,11 @@
                     <button type="submit" class='button-small'>My overview</button>
                 </form>
             </li>
+
             <li class="">
                 <form method="post" action="{% url 'list_of_ledgers' %}">
                     {% csrf_token %}
                     <button type="submit" class='button-small'>Ledgers</button>
-                </form>
-            </li>
-            <li class="">
-                <form method="post" action="{% url 'list_of_payments' %}">
-                    {% csrf_token %}
-                    <button type="submit" class='button-small'>Payments</button>
                 </form>
             </li>
 
@@ -97,16 +90,11 @@
                     <button type="submit" class='button-small outline'>My overview</button>
                 </form>
             </li>
+
             <li class="">
                 <form method="post" action="{% url 'list_of_ledgers' %}">
                     {% csrf_token %}
                     <button type="submit" class='button-small outline'>Ledgers</button>
-                </form>
-            </li>
-            <li class="">
-                <form method="post" action="{% url 'list_of_payments' %}">
-                    {% csrf_token %}
-                    <button type="submit" class='button-small outline'>Payments</button>
                 </form>
             </li>
 
@@ -115,12 +103,44 @@
         </ul>
 
         <ul class="nav_right">
-
+            
             <li><button id="theme-toggle">🌞 / 🌒</button></li>
             <li class="dropdown">
                 <button id="color-toggle">🎨</button>
                 <ul class="dropdown-content" id="color-options">
 
+                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.cyan.min.css' %}">
+                        <span class="color-pick-color" style="background-color: #047878;"></span>
+                    </button></li>
+
+                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.jade.min.css' %}">
+                        <span class="color-pick-color" style="background-color: #007a50;"></span>
+                    </button></li>
+            
+                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.green.min.css' %}">
+                        <span class="color-pick-color" style="background-color: #398712;"></span>
+                    </button></li>
+            
+                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.lime.min.css' %}">
+                        <span class="color-pick-color" style="background-color: #a5d601;"></span>
+                    </button></li>
+            
+                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.yellow.min.css' %}">
+                        <span class="color-pick-color" style="background-color: #f2df0d;"></span>
+                    </button></li>
+            
+                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.amber.min.css' %}">
+                        <span class="color-pick-color" style="background-color: #ffbf00;"></span>
+                    </button></li>
+            
+                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.pumpkin.min.css' %}">
+                        <span class="color-pick-color" style="background-color: #ff9500;"></span>
+                    </button></li>
+            
+                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.orange.min.css' %}">
+                        <span class="color-pick-color" style="background-color: #d24317;"></span>
+                    </button></li>
+                    
                     <li><button class="color-pick-button" data-color="{% static 'styles/pico.red.min.css' %}">
                         <span class="color-pick-color" style="background-color: #c52f21;"></span>
                     </button></li>
@@ -152,54 +172,24 @@
                     <li><button class="color-pick-button" data-color="{% static 'styles/pico.azure.min.css' %}">
                         <span class="color-pick-color" style="background-color: #0172ad;"></span>
                     </button></li>
-
-                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.cyan.min.css' %}">
-                        <span class="color-pick-color" style="background-color: #047878;"></span>
-                    </button></li>
-
-                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.jade.min.css' %}">
-                        <span class="color-pick-color" style="background-color: #007a50;"></span>
-                    </button></li>
-
-                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.green.min.css' %}">
-                        <span class="color-pick-color" style="background-color: #398712;"></span>
-                    </button></li>
-
-                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.lime.min.css' %}">
-                        <span class="color-pick-color" style="background-color: #a5d601;"></span>
-                    </button></li>
-
-                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.yellow.min.css' %}">
-                        <span class="color-pick-color" style="background-color: #f2df0d;"></span>
-                    </button></li>
-
-                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.amber.min.css' %}">
-                        <span class="color-pick-color" style="background-color: #ffbf00;"></span>
-                    </button></li>
-
-                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.pumpkin.min.css' %}">
-                        <span class="color-pick-color" style="background-color: #ff9500;"></span>
-                    </button></li>
-
-                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.orange.min.css' %}">
-                        <span class="color-pick-color" style="background-color: #d24317;"></span>
-                    </button></li>
-
-                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.sand.min.css' %}">
-                        <span class="color-pick-color" style="background-color: #ccc6b4;"></span>
-                    </button></li>
-
-                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.grey.min.css' %}">
-                        <span class="color-pick-color" style="background-color: #ababab;"></span>
+                    
+                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.slate.min.css' %}">
+                        <span class="color-pick-color" style="background-color: #525f7a;"></span>
                     </button></li>
 
                     <li><button class="color-pick-button" data-color="{% static 'styles/pico.zinc.min.css' %}">
                         <span class="color-pick-color" style="background-color: #646b79;"></span>
                     </button></li>
 
-                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.slate.min.css' %}">
-                        <span class="color-pick-color" style="background-color: #525f7a;"></span>
+                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.grey.min.css' %}">
+                        <span class="color-pick-color" style="background-color: #ababab;"></span>
                     </button></li>
+
+                    <li><button class="color-pick-button" data-color="{% static 'styles/pico.sand.min.css' %}">
+                        <span class="color-pick-color" style="background-color: #ccc6b4;"></span>
+                    </button></li>
+
+
 
                 </ul>
             </li>

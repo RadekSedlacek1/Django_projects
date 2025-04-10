@@ -6,7 +6,7 @@ from django.utils.text import slugify
 
 # Create your models here.
 class AbstractBase(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=25)
     slug = models.SlugField(max_length=100, blank=True)
     desc = models.CharField(max_length=2000, blank=True)
 
@@ -52,6 +52,5 @@ class PaymentBalance(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     payment = models.ForeignKey(Payment, on_delete=models.PROTECT)
     balance = models.DecimalField(max_digits=10, decimal_places=2)
-    
     def __str__(self):  
         return f"Payment balance, ID: {self.pk}, {self.payment.name}, {self.user}: {self.balance}"

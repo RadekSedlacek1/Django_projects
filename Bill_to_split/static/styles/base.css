@@ -8,15 +8,15 @@
 }
 
 .top_navbar {
-    max-width: 110vh;
+    max-width: 100vh;
 }
 
 body {
-    max-width: 150vh;
+    max-width: 100vh;
 }
 
 .h1_title {
-    max-width: 110vh;
+    max-width: 100vh;
 }
 
 .nav_left {
@@ -41,7 +41,7 @@ body {
 .content {
     padding-left: 30px;
     padding-right: 30px;
-    max-width: 110vh;
+    max-width: 100vh;
 }
 
 .custom-warning {

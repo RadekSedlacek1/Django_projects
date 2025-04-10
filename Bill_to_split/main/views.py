@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
@@ -45,7 +45,7 @@ def sign_up(request):
 
 @login_required(login_url='/login')
 def list_of_ledgers(request):
-    if request.method == 'POST':                                    # when from template returns POST
+    if request.method == 'POST':                                        # when from template returns POST
         if 'ledger-delete' in request.POST:
             ledger_id = request.POST.get('ledger-delete')               # take the id form the template
             if ledger_id:                                               # do the rest only if you have id to delete
@@ -57,11 +57,11 @@ def list_of_ledgers(request):
             ledger_id = request.POST.get('ledger-detail')               # take the id form the template
             if ledger_id:                                               # do the rest only if you have id to go to
                 return redirect('ledger_detail', ledger_pk=ledger_id)
-            
+
         if 'new-payment' in request.POST:
-            ledger_id = request.POST.get('new-payment')               # take the id form the template
+            ledger_id = request.POST.get('new-payment')                 # take the id form the template
             if ledger_id:                                               # do the rest only if you have id to go to
-                pass
+                return redirect('payment_add',ledger_pk=ledger_id)
 
     user = request.user
     ledgers = Ledger.objects.filter(
@@ -86,9 +86,6 @@ def list_of_ledgers(request):
 
     return render(request, 'main/list_of_ledgers.html', {'ledgers':ledgers})
 
-
-
-
 @login_required(login_url='/login')
 def ledger_add(request):
     if request.method == 'POST':                # if sending filled form
@@ -104,13 +101,17 @@ def ledger_add(request):
 
 @login_required(login_url='/login')
 def ledger_detail(request, ledger_pk):
+    if request.method == 'POST':                                            # when from template returns POST
+        if 'new-payment' in request.POST:
+            ledger_id = request.POST.get('new-payment')                 # take the id form the template
+            if ledger_id:                                               # do the rest only if you have id to go to
+                return redirect('payment_add',ledger_pk=ledger_id)
+    
     ledger = Ledger.objects.get(id=ledger_pk)
     payments = Payment.objects.filter(ledger=ledger)
     balances = PaymentBalance.objects.filter(payment__in=payments).select_related('user')
     user_balances = balances.values('user__username').annotate(total_balance=Sum('balance'))
-    user = request.user
 
-                
     return render(request, 'main/ledger_detail.html', {
         'ledger': ledger,
         'payments': payments,
@@ -125,66 +126,71 @@ def ledger_edit(request):
 
 ##############################    Payment related views    ##############################
 
-@login_required(login_url='/login')
-def list_of_payments(request):
-    
-    if request.method == 'POST':                                      # when from template returns POST
-        payment_id = request.POST.get('payment-delete')               # take the id form the template
-        if payment_id:                                                # do the rest only if you have id to delete
-            payment = Payment.objects.filter(id=payment_id).first()   # take this ledger from the db
-            print(f"{payment} deleted")                               # must be before delete, after deletion there is no ID anymore
-            payment.delete()
-        
-    payments = Payment.objects.all()
-    return render(request, 'main/list_of_payments.html', {'payments':payments})
-
 
 @login_required(login_url='/login')
-def payment_add(request):
+def payment_add(request, ledger_pk):
+    ledger = get_object_or_404(Ledger, pk=ledger_pk)
 
-    pprint.pprint(request.POST)  # Debug
-    print("Metoda requestu:", request.method)
+    participants = User.objects.filter(
+        Q(payment__ledger=ledger) | Q(paymentbalance__payment__ledger=ledger)
+    ).distinct()
 
-    num_participants = 5                            # if 5 users
-    referer = request.META.get("HTTP_REFERER", "")  # to check where from the POST method comes
-    
     if request.method == 'POST':
-        if "payment_add" in referer:                 # only if you see POST from this page
+        form = PaymentForm(request.POST)
+        if form.is_valid():
+            payment = form.save(commit=False)
+            payment.user = request.user
+            payment.ledger = ledger
+            payment.save()
 
-            form = PaymentForm(request.POST)         # if sending filled form
-            
-            if form.is_valid():                      # and if it fits database
-                payment = form.save(commit=False)    # do not send it yet
-                payment.user = request.user          # who saved it is an owner
-                payment.save()                       # now save it
+            payer_id = int(request.POST.get('payer'))
+            payer_user = get_object_or_404(User, id=payer_id)
 
-            for i in range(num_participants):        # for each form
-                balance_form = PaymentBalanceForm(request.POST, prefix=f"balance-{i}") # balance forms decomposition
-                if balance_form.is_valid() and balance_form.cleaned_data.get('user') and balance_form.cleaned_data.get('balance'):
-                    balance = balance_form.save(commit=False)
-                    balance.payment = payment
-                    balance.save()
-            return redirect ('/list_of_payments')
+            # 1. Vždy uložit +cost pro plátce
+            PaymentBalance.objects.create(
+                user=payer_user,
+                payment=payment,
+                balance=payment.cost
+            )
 
+            # 2. Zpracování balances pro zatržené uživatele (včetně plátce jako beneficienta)
+            for user in participants:
+                include_user = request.POST.get(f'include_{user.id}') == 'on'
+                balance_value = request.POST.get(f'balance_{user.id}')
+                if include_user and balance_value is not None:
+                    try:
+                        balance = float(balance_value)
+                        PaymentBalance.objects.create(
+                            user=user,
+                            payment=payment,
+                            balance=balance
+                        )
+                    except ValueError:
+                        # špatná hodnota, ignoruj
+                        pass
 
-# Pozor, zatím můžou proběhnout prázdné platby, udělá se záznam o platbě, ale nejsou na ni navázané žádné balances
+            return redirect('ledger_detail', ledger_pk=ledger_pk)
 
+    all_balances = PaymentBalance.objects.filter(payment__ledger=ledger)
+    involved_users_ids = all_balances.values_list('user_id', flat=True).distinct()
+    involved_users = User.objects.filter(id__in=involved_users_ids)
 
+    payment_form = PaymentForm()
+    balance_forms = []
+    for i, user in enumerate(sorted(involved_users, key=lambda u: u != request.user)):  # přihlášený uživatel první
+        form = PaymentBalanceForm(prefix=f'balance-{i}', initial={'user': user})
+        balance_forms.append((user, form))
 
-    # if not: rendering a form 
-    payment = PaymentForm()
-    balances = []
-        
-    for i in range(num_participants):
-        balance = PaymentBalanceForm(prefix=f"balance-{i}")  # return 5 times form of balance
-        balances.append(balance)
-            
-    return render(request, 'main/payment_add.html', {'payment': payment,'balances': balances})
+    else:
+        form = PaymentForm()
 
-@login_required(login_url='/login')
-def payment_detail(request):
-    payment = Payment()
-    return render(request, 'main/payment_detail.html', {})
+    return render(request, 'main/payment_add.html', {
+        'payment_form': payment_form,
+        'balance_forms': balance_forms,
+        'users': involved_users,
+        'logged_in_user': request.user,
+        'ledger_pk': ledger_pk,
+    })
 
 @login_required(login_url='/login')
 def payment_edit(request):

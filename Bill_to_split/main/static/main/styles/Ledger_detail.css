@@ -24,8 +24,6 @@
 }
 
 .card-container {
-    max-height: 75vh;
-    max-width: 100vh;
     padding-right: 10px;
     margin-top: 20px;
 }
@@ -33,7 +31,6 @@
 .card {
     border: 2px solid var(--pico-primary);
     border-radius: 10px;
-    max-width: 90vh;
     margin: 30px auto;
     padding: 10px 5px;
     background-color: color-mix(in srgb, rgba(125, 125, 125, 0.05), var(--pico-primary) 15%);

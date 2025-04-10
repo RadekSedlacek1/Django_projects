@@ -20,10 +20,9 @@ class LedgerForm(forms.ModelForm):
         }
 
 class PaymentForm(forms.ModelForm):
-    ledger = forms.ModelChoiceField(queryset=Ledger.objects.all(), required=True, label="Select Ledger")
     class Meta:
         model = Payment
-        fields = ["ledger", "name", "cost", "desc"]
+        fields = ["name", "cost", "desc"]
         widgets = {
             "desc": forms.Textarea(attrs={"rows": 3, "placeholder": "Description"}),
         }
