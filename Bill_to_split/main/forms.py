@@ -30,7 +30,7 @@ class PaymentForm(forms.ModelForm):
 class PaymentBalanceForm(forms.ModelForm):
     class Meta:
         model = PaymentBalance
-        fields = ["user", "balance"]
+        fields = ["person", "balance"]
         widgets = {
             "balance": forms.NumberInput(attrs={"placeholder": "payment balance"}),
         }
@@ -38,6 +38,6 @@ class PaymentBalanceForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields['user'].required = False
+        self.fields['person'].required = False
         self.fields['balance'].required = False
         # To allow sending form from template with empty fields

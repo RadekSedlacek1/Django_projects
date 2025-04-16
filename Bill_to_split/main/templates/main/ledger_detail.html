@@ -37,8 +37,8 @@
             <tbody>
                 {% for balance in user_balances %}
                     <tr>
-                        <td>{{ balance.user__username }}</td>
-                        <td>{{ balance.total_balance }}</td>
+                        <td>{{ balance.name }}</td>
+                        <td>{{ balance.balance }}</td>
                     </tr>
                 {% empty %}
                     <tr>
@@ -116,7 +116,7 @@
                             {% for balance in balances %}
                                 {% if balance.payment.id == payment.id %}
                                     <tr>
-                                        <td>{{ balance.user.username }}:</td>
+                                        <td>{{ balance.person.username }}:</td>
                                         <td>{{ balance.balance }}</td>
                                     </tr>
                                 {% endif %}
