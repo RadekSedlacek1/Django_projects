@@ -16,189 +16,215 @@
 
 {% block content %}
 
-{% comment %} <form method="post"> {% endcomment %}
-    <form method="post">
-        {% csrf_token %}
-      
-        <label for="id_name">Název platby:</label>
-        {{ payment_form.name }}
-      
-        <label for="id_cost">Částka platby:</label>
-        {{ payment_form.cost }}
-      
-        <label for="payer">Kdo platil:</label>
-        <select name="payer" id="payer">
-          {% for user in users %}
-            <option value="{{ user.id }}" {% if user == logged_in_user %}selected{% endif %}>{{ user.username }}</option>
-          {% endfor %}
-        </select>
-      
-        <label>
-          <input type="checkbox" id="split_evenly" checked>
-          Rozdělit platbu rovnoměrně
-        </label>
-      
-        <table>
-            <thead>
-              <tr>
+<p>Ledger: {{ ledger }}</p>
+<p>Participants: {{ participants }}</p>
+
+<form method="post">
+    {% csrf_token %}
+
+    <label for="id_name">Název platby:</label>
+    {{ form.name }}
+
+    <label for="id_cost">Částka platby:</label>
+    {{ form.cost }}
+
+    <label for="payer">Kdo platil:</label>
+    <select name="payer" id="payer">
+        {% for participant in participant_values %}
+            <option value="{{ participant.person.id }}"
+                {% if participant.person == request.user.person %}selected{% endif %}>
+                {{ participant.person.user.username|default:participant.person.name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <label>
+        <input type="checkbox" id="split_evenly" checked>
+        Rozdělit platbu rovnoměrně
+    </label>
+
+    <table>
+        <thead>
+            <tr>
                 <th>Zapojit</th>
                 <th>Uživatel</th>
                 <th>Balance</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for user, form in balance_forms %}
-              <tr class="user-row" data-user-id="{{ user.id }}">
-                <td>
-                  <input type="checkbox" name="include_{{ user.id }}" class="include-user" checked>
-                </td>
-                <td>{{ user.username }}</td>
-                <td>
-                  <input type="number" step="0.01" name="balance_{{ user.id }}" class="balance-input">
-                  <input type="hidden" name="user_id_{{ user.id }}" value="{{ user.id }}">
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-      
+            </tr>
+        </thead>
+        <tbody>
+            {% for participant in participant_values %}
+                <tr class="user-row" data-user-id="{{ participant.person.id }}">
+                    <td>
+                        <input type="checkbox" name="include_{{ participant.person.id }}" class="include-user"
+                        {% if participant.person.id in included_ids or not request.POST %}checked{% endif %}>
+                    </td>
+                    <td>{{ participant.person.user.username|default:participant.person.name }}</td>
+                    <td>
+                        <input type="number" step="0.01" name="balance_{{ participant.person.id }}" class="balance-input"
+                            value="{{ participant.balance }}">
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if error %}
+        <div id="error-message" style="color: red;">{{ error }}</div>
+    {% else %}
         <div id="error-message" style="color: red; display: none;">Součet balances se nerovná částce platby.</div>
+    {% endif %}
+
+    <button type="submit" id="submit-btn" class="contrast">Odeslat platbu</button>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const splitCheckbox = document.getElementById('split_evenly');
+    const costInput = document.getElementById('id_cost');
+    const userRows = document.querySelectorAll('.user-row');
+    const submitButton = document.getElementById('submit-btn');
+    const errorMessage = document.getElementById('error-message');
+    const payerSelect = document.getElementById('payer');
+    const form = document.querySelector('form');
+
+    function getCheckedRows() {
+        return Array.from(userRows).filter(row =>
+            row.querySelector('.include-user').checked
+        );
+    }
+
+    function getBalanceInput(row) {
+        const userId = row.dataset.userId;
+        return row.querySelector(`input[name="balance_${userId}"]`);
+    }
+
+    function updateBalances() {
+        const cost = parseFloat(costInput.value);
+        if (isNaN(cost) || cost <= 0) return;
       
-        <button type="submit" id="submit-btn" class="contrast">Odeslat platbu</button>
-      </form>
-    
-      <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const splitCheckbox = document.getElementById('split_evenly');
-            const costInput = document.getElementById('id_cost');
-            const userRows = document.querySelectorAll('.user-row');
-            const submitButton = document.getElementById('submit-btn');
-            const errorMessage = document.getElementById('error-message');
-            const payerSelect = document.getElementById('payer');
+        const checkedRows = getCheckedRows();
+        const payerId = parseInt(payerSelect.value);
+        const numRecipients = checkedRows.length;
+        const baseShare = Math.floor((-cost / numRecipients) * 100) / 100;
+        let distributed = 0;
+      
+        userRows.forEach(row => {
+            const balanceInput = getBalanceInput(row);
+            balanceInput.value = "";
+        });
 
-            function getCheckedRows() {
-            return Array.from(userRows).filter(row =>
-                row.querySelector('.include-user').checked
-            );
-            }
-
-            function getBalanceInput(row) {
-            const userId = row.dataset.userId;
-            return row.querySelector(`input[name="balance_${userId}"]`);
-            }
-
-            function updateBalances() {
-                const cost = parseFloat(costInput.value);
-                if (isNaN(cost) || cost <= 0) return;
-              
-                const checkedRows = getCheckedRows();
-                const payerId = parseInt(payerSelect.value);
-                const numRecipients = checkedRows.length;
-                const baseShare = Math.floor((-cost / numRecipients) * 100) / 100;
-                let distributed = 0;
-              
-                // Nejprve resetuj všechny
-                userRows.forEach(row => {
-                  const balanceInput = getBalanceInput(row);
-                  balanceInput.value = "";
-                });
-              
-                checkedRows.forEach(row => {
-                  const userId = parseInt(row.dataset.userId);
-                  const balanceInput = getBalanceInput(row);
-              
-                  // Pokud to není plátce, nastav záporný podíl
-                  if (userId !== payerId) {
-                    balanceInput.value = baseShare.toFixed(2);
-                    distributed += parseFloat(balanceInput.value);
-                  } else {
-                    // Pokud je to plátce a zároveň příjemce
-                    if (row.querySelector('.include-user').checked) {
-                      balanceInput.value = ""; // počkáme a nastavíme ho pak, aby nepřepsal ruční úpravy
-                    }
-                  }
-                });
-              
-                // Nakonec vždy nastav záznam plátce
-                const payerRow = Array.from(userRows).find(
-                  row => parseInt(row.dataset.userId) === payerId
-                );
-                if (payerRow) {
-                  const payerInput = getBalanceInput(payerRow);
-                  const payerBalance = (-cost - distributed).toFixed(2);
-                  payerInput.value = payerBalance;
-                  payerInput.disabled = false;
-                }
-              }
-
-            function toggleUserRow(row) {
-            const checkbox = row.querySelector('.include-user');
+        checkedRows.forEach(row => {
+            const userId = parseInt(row.dataset.userId);
             const balanceInput = getBalanceInput(row);
 
-            checkbox.addEventListener('change', () => {
-                if (!checkbox.checked) {
-                balanceInput.value = "";
-                balanceInput.disabled = true;
-                } else {
-                balanceInput.disabled = false;
-                }
-
-                if (splitCheckbox.checked) {
-                updateBalances();
-                }
-
-                validateTotal();
-            });
+            if (userId !== payerId) {
+                balanceInput.value = baseShare.toFixed(2);
+                distributed += parseFloat(balanceInput.value);
             }
-
-            function validateTotal() {
-            const cost = parseFloat(costInput.value) || 0;
-            let total = 0;
-
-            userRows.forEach(row => {
-                const checkbox = row.querySelector('.include-user');
-                const input = getBalanceInput(row);
-                if (checkbox.checked && input.value) {
-                total += parseFloat(input.value) || 0;
-                }
-            });
-
-            total += cost;
-            if (Math.abs(total) > 0.009) {
-                errorMessage.style.display = "block";
-                submitButton.disabled = true;
-            } else {
-                errorMessage.style.display = "none";
-                submitButton.disabled = false;
-            }
-            }
-
-            userRows.forEach(row => {
-            toggleUserRow(row);
-            const input = getBalanceInput(row);
-            input.addEventListener('input', validateTotal);
-            });
-
-            costInput.addEventListener('input', () => {
-            updateBalances();
-            validateTotal();
-            });
-
-            splitCheckbox.addEventListener('change', () => {
-            updateBalances();
-            validateTotal();
-            });
-
-            payerSelect.addEventListener('change', () => {
-            if (splitCheckbox.checked) {
-                updateBalances();
-                validateTotal();
-            }
-            });
-
-            updateBalances();
-            validateTotal();
         });
-    </script>
 
+        const payerRow = Array.from(userRows).find(
+            row => parseInt(row.dataset.userId) === payerId
+        );
+        if (payerRow) {
+            const payerInput = getBalanceInput(payerRow);
+            const payerBalance = (-cost - distributed).toFixed(2);
+            payerInput.value = payerBalance;
+            payerInput.disabled = false;
+        }
+    }
+
+function toggleUserRow(row) {
+    const checkbox = row.querySelector('.include-user');
+    const balanceInput = getBalanceInput(row);
+
+    if (!checkbox.checked) {
+        balanceInput.value = "0.00";  // místo "", nastavíme nulu
+        balanceInput.disabled = false; // zajistíme, že pole zůstává aktivní
+    } else {
+        if (balanceInput.value === "0.00" || balanceInput.value === "") {
+            balanceInput.value = "";  // umožníme ruční zadání po opětovném zaškrtnutí
+        }
+    }
+}
+
+    function validateTotal() {
+        const cost = parseFloat(costInput.value) || 0;
+        let total = 0;
+
+        userRows.forEach(row => {
+            const checkbox = row.querySelector('.include-user');
+            const input = getBalanceInput(row);
+            if (checkbox.checked && input.value) {
+                total += parseFloat(input.value) || 0;
+            }
+        });
+
+        total += cost;
+        if (Math.abs(total) > 0.009) {
+            errorMessage.style.display = "block";
+            submitButton.disabled = true;
+        } else {
+            errorMessage.style.display = "none";
+            submitButton.disabled = false;
+        }
+    }
+
+    function addBalanceToForm(row) {
+        const checkbox = row.querySelector('.include-user');
+        const userId = row.dataset.userId;
+        const balanceInput = getBalanceInput(row);
+
+        if (checkbox.checked) {
+            const balanceValue = balanceInput.value || '';
+            const balanceKey = `balance_${userId}`;
+            
+            // Přidáme skrytý input s hodnotou balance pro každého zaškrtnutého uživatele
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = balanceKey;
+            hiddenInput.value = balanceValue;
+            form.appendChild(hiddenInput);
+        } else {
+            const hiddenInput = document.querySelector(`input[name="balance_${userId}"]`);
+            if (hiddenInput) hiddenInput.remove();
+        }
+    }
+
+    userRows.forEach(row => {
+        toggleUserRow(row);
+        const input = getBalanceInput(row);
+        input.addEventListener('input', () => {
+            validateTotal();
+            addBalanceToForm(row);  // Přidáme balance při každé změně inputu
+        });
+    });
+
+    costInput.addEventListener('input', () => {
+        updateBalances();
+        validateTotal();
+    });
+
+    splitCheckbox.addEventListener('change', () => {
+        updateBalances();
+        validateTotal();
+    });
+
+    payerSelect.addEventListener('change', () => {
+        if (splitCheckbox.checked) {
+            updateBalances();
+            validateTotal();
+        }
+    });
+
+    form.addEventListener('submit', function(event) {
+        userRows.forEach(row => {
+            addBalanceToForm(row);  // Přidáme balance pro každého uživatele při submitu
+        });
+    });
+
+    updateBalances();
+    validateTotal();
+});
+</script>
 {% endblock content %}

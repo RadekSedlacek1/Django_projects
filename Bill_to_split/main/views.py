@@ -162,81 +162,106 @@ def ledger_edit(request):
 def payment_add(request, ledger_pk):
     ledger = get_object_or_404(Ledger, pk=ledger_pk)
 
-    participants = Person.objects.filter(
-        paymentbalance__payment__ledger=ledger
-        ).distinct()
+    # Načteme účastníky, aby plátce byl na prvním místě
+    participants = list(Person.objects.filter(paymentbalance__payment__ledger=ledger).distinct())
+    participants = [request.user.person] + [person for person in participants if person != request.user.person]
+
+    form = PaymentForm(request.POST or None)
 
     if request.method == 'POST':
-        form = PaymentForm(request.POST)
-        if form.is_valid():
+        # Debugging: výpis POST dat
+        print("POST data:", request.POST)
+
+        # 1. Přečíst hodnoty z POST dat
+        participant_values = []
+        payer_person = None
+        for person in participants:
+            balance_raw = request.POST.get(f"balance_{person.id}", "")
+            balance = balance_raw.strip() if balance_raw else ""
+            # Pokud je balance vyplněná, přidáme do participant_values
+            if balance != "":
+                participant_values.append({
+                    "person": person,
+                    "balance": float(balance),  # Převod balance na float
+                })
+
+            # Identifikace plátce
+            if request.POST.get("payer") == str(person.id):
+                payer_person = person
+
+        print("Payer Person:", payer_person)
+        print("Participant Values:", participant_values)
+
+        if form.is_valid() and payer_person:
+            print("Formulář je validní a plátce je určen.")
+            # Získáme celkový náklad platby z formuláře
+            cost = round(float(request.POST.get("cost", 0)), 2)
+            total_balance = 0
+
+            # 2. Vytvoříme seznam balance pro plátce
+            balances_to_create = []
+            if payer_person:
+                balances_to_create.append((payer_person, cost))  # Kladná balance pro plátce
+                total_balance += cost  # Přičteme kladnou balance plátce
+
+            # 3. Vytvoříme záporné balance pro ostatní účastníky
+            for item in participant_values:
+                person = item["person"]
+                balance = item["balance"]
+                balances_to_create.append((person, balance))  # Záporná balance pro účastníky
+                total_balance += balance  # Přičteme zápornou balance do součtu
+            print(balances_to_create)
+            
+            # 4. Validace součtu balance (cost + balances)
+            if round(total_balance, 2) != 0:
+                print(f"Chyba v součtu balance: {total_balance}")
+                return render(request, 'main/payment_add.html', {
+                    'form': form,
+                    'ledger': ledger,
+                    'participant_values': participant_values,
+                    'error': 'Součet balance (platba + dluhy) není nulový.',
+                })
+
+            # 5. Uložení balance do databáze v transakci
             with transaction.atomic():
                 payment = form.save(commit=False)
-                payment.person = request.user.person
+                payment.user = request.user
                 payment.ledger = ledger
+                payment.cost = cost
                 payment.save()
+                print("Platba uložena do databáze.")
 
-                payer_id = int(request.POST.get('payer'))
-                payer_person = get_object_or_404(Person, id=payer_id)
-
-                # 1. Vždy uložit +cost pro plátce
-                PaymentBalance.objects.create(
-                    person=payer_person,
-                    payment=payment,
-                    balance=payment.cost
-                )
-
-                # 2. Zpracování balances pro zatržené uživatele (včetně plátce jako beneficienta)
-                total_balance = 0
-                balances_to_create = []
-                
-                for person in participants:
-                    include_user = request.POST.get(f'include_{person.id}') == 'on'
-                    balance_value = request.POST.get(f'balance_{person.id}')
-                    if include_user and balance_value is not None:
-                        try:
-                            balance = float(balance_value)
-                            total_balance += balance
-                            balances_to_create.append((person, balance))
-                        except ValueError:
-                            # špatná hodnota, ignoruj
-                            pass
-                        
-                # 3. Validace – součet všech balances musí být opačný k částce
-                if round(total_balance + payment.cost, 2) != 0:
-                    # neplatný součet, vrať zpět s chybou
-                    return render(request, 'main/payment_add.html', {
-                        'form': form,
-                        'participants': participants,
-                        'ledger': ledger,
-                        'error': 'Součet balances se nerovná celkové částce platby.',
-                    })
-
-                 # 4. Vytvoření balance záznamů pro všechny zahrnuté účastníky
+                # 6. Ukládáme jednotlivé balances do databáze
                 for person, balance in balances_to_create:
-                    PaymentBalance.objects.create(
-                        person=person,
-                        payment=payment,
-                        balance=balance
-                    )
-
-                return redirect('ledger_detail', ledger_pk=ledger_pk)
+                    if balance != 0:  # Neuložíme balance, která je 0
+                        PaymentBalance.objects.create(
+                            person=person,
+                            payment=payment,
+                            balance=balance
+                        )
+                        print(f"Balance {balance} uložena pro {person.name}")
 
         else:
-        # Nevalidní form – padne sem, pokud např. chybí název nebo cost
+            print("Formulář není validní nebo plátce není určen.")
             return render(request, 'main/payment_add.html', {
                 'form': form,
-                'participants': participants,
                 'ledger': ledger,
-                'error': 'Formulář obsahuje chyby.',
+                'participant_values': participant_values,
+                'error': 'Formulář obsahuje chyby nebo plátce není vybrán.',
             })
 
+        # Po úspěšném uložení přesměrujeme na detail ledgeru
+        print("Přesměrování na detail ledgeru.")
+        return redirect('ledger_detail', ledger_pk=ledger_pk)
+
     else:
-        # GET metoda – zobrazí prázdný formulář
-        form = PaymentForm()
+        # GET - inicializujeme prázdné hodnoty balance
+        participant_values = [{"person": person, "balance": ""} for person in participants]
+
         return render(request, 'main/payment_add.html', {
             'form': form,
-            'participants': participants,
             'ledger': ledger,
+            'participant_values': participant_values,
         })
 
 @login_required(login_url='/login')
