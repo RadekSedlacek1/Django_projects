@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
+from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, permission_required
-from .models import Ledger, Payment, PaymentBalance, Person, UserPlaceholder
-from .forms import UserRegisterForm, LedgerForm, PaymentForm, PaymentBalanceForm
+from .models import Ledger, Payment, PaymentBalance, Person, UserPlaceholder, ContactConnection
+from .forms import UserRegisterForm, LedgerForm, PaymentForm, PaymentBalanceForm, AddContactForm
 from django.forms import inlineformset_factory
 from django.db.models import Q, Sum
 from collections import defaultdict
@@ -39,6 +40,56 @@ def sign_up(request):
     else:
         form = UserRegisterForm()
     return render(request, 'registration/sign_up.html', {'form': form})
+
+
+@login_required
+def contact_list(request):
+    person = get_object_or_404(Person, user=request.user)
+    form = AddContactForm()
+
+    if request.method == "POST":
+        form = AddContactForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+
+            try:
+                other_user = User.objects.get(email=email)
+                other_person = Person.objects.get(user=other_user)
+
+                # Zkontroluj, zda spojení už neexistuje (obousměrně)
+                exists = ContactConnection.objects.filter(
+                    person_a=person, person_b=other_person
+                ).exists() or ContactConnection.objects.filter(
+                    person_a=other_person, person_b=person
+                ).exists()
+
+                if not exists:
+                    ContactConnection.objects.create(
+                        person_a=person,
+                        person_b=other_person,
+                        explicit=True
+                    )
+                    messages.success(request, f"Kontakt s uživatelem {email} byl přidán.")
+                    return redirect('contact_list')
+                else:
+                    messages.info(request, "Tento kontakt už existuje.")
+            except User.DoesNotExist:
+                messages.error(request, f"Uživatel s e-mailem {email} neexistuje.")
+            except Person.DoesNotExist:
+                messages.error(request, f"Uživatel s e-mailem {email} nemá vytvořený Person profil.")
+
+    connections = ContactConnection.objects.filter(
+        Q(person_a=person) | Q(person_b=person)
+    )
+
+    context = {
+        'form': form,
+        'connections': connections,
+    }
+
+    return render(request, 'main/contact_list.html', context)
+
+
 
 ##############################    Ledger related views    
 ##############################
@@ -124,13 +175,62 @@ def ledger_add(request):
 
 @login_required(login_url='/login')
 def ledger_detail(request, ledger_pk):
+    ledger = Ledger.objects.get(id=ledger_pk)
+    user_person = Person.objects.get(user=request.user)
+    
     if request.method == 'POST':                                            # when from template returns POST
         if 'new-payment' in request.POST:
             ledger_id = request.POST.get('new-payment')                     # take the id form the template
             if ledger_id:                                                   # do the rest only if you have id to go to
                 return redirect('payment_add', ledger_pk=ledger_id)
 
-    ledger = Ledger.objects.get(id=ledger_pk)
+        if 'payment-delete' in request.POST:
+            payment_id = request.POST.get('payment-delete')                     # take the id form the template
+            if payment_id:                                                   # do the rest only if you have id to go to
+                        with transaction.atomic():
+                            payment = get_object_or_404(Payment, id=payment_id)
+                            PaymentBalance.objects.filter(payment=payment).delete()
+                            payment.delete()
+                            
+        if 'add_person_to_ledger' in request.POST:
+            person_id = request.POST.get('person_to_add')
+            person_to_add = get_object_or_404(Person, pk=person_id)
+
+            with transaction.atomic():
+                dummy_payment = Payment.objects.create(
+                    ledger=ledger,
+                    name=f"{person_to_add.name} added to the ledger",
+                    desc=f"Dummy payment to connect {person_to_add.name} with ledger",
+                    user=request.user,
+                    cost=0,
+                )
+
+                PaymentBalance.objects.create(
+                    payment=dummy_payment,
+                    person=person_to_add,
+                    balance=0
+                )
+
+    # Pro přidání uživatele
+    
+    # Seznam osob propojených s uživatelem, ale zatím ne v ledgeru
+    connected_persons = ContactConnection.objects.filter(
+        Q(person_a=user_person) | Q(person_b=user_person)
+    )
+    
+    related_people = set()
+    for conn in connected_persons:
+        other = conn.person_b if conn.person_a == user_person else conn.person_a
+        related_people.add(other)
+
+    people_in_ledger = Person.objects.filter(
+        paymentbalance__payment__ledger=ledger
+    ).distinct()
+
+    people_available_to_add = [p for p in related_people if p not in people_in_ledger]
+    
+    # pro přidání uživatele konec
+
     payments = Payment.objects.filter(ledger=ledger)
     balances = PaymentBalance.objects.filter(payment__in=payments).select_related('person')
 
@@ -138,7 +238,7 @@ def ledger_detail(request, ledger_pk):
     user_balances = defaultdict(lambda: 0)
 
     for b in balances:
-        user_balances[b.person] += b.balance  # `b.person` je instance Person
+        user_balances[b.person] += b.balance
 
     # převod do seznamu slovníků pro template
     user_balances_list = [{'person': p, 'name': p.name, 'balance': total} for p, total in user_balances.items()]
@@ -148,6 +248,7 @@ def ledger_detail(request, ledger_pk):
         'payments': payments,
         'balances': balances,
         'user_balances': user_balances_list,  # posíláme připravená data
+        'people_available_to_add': people_available_to_add,
     })
 
 @login_required(login_url='/login')

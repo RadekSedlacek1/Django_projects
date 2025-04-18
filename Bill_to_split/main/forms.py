@@ -11,6 +11,9 @@ class UserRegisterForm(UserCreationForm):
         model = User
         fields = ["username", "email", "password1", "password2"]
 
+class AddContactForm(forms.Form):
+    email = forms.EmailField(label="E-mail kontaktu")
+
 class LedgerForm(forms.ModelForm):
     class Meta:
         model = Ledger
@@ -41,3 +44,4 @@ class PaymentBalanceForm(forms.ModelForm):
         self.fields['person'].required = False
         self.fields['balance'].required = False
         # To allow sending form from template with empty fields
+        

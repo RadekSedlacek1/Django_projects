@@ -23,6 +23,8 @@
         </button>
 </form>
 
+
+
 <h3>Users balances:</h3>
 
 <div class='ledger-overview'> 
@@ -45,6 +47,27 @@
                         <td colspan="2">Žádné záznamy</td>
                     </tr>
                 {% endfor %}
+
+                {% if people_available_to_add %}
+                    <tr>
+                        <td>
+                            <form method="post">
+                                {% csrf_token %}
+                                <label for="person_to_add">Přidat osobu do ledgeru:</label>
+                                <select name="person_to_add" id="person_to_add" required>
+                                    <option value="" disabled selected>----------</option>
+                                    {% for person in people_available_to_add %}
+                                        <option value="{{ person.id }}">{{ person.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" name="add_person_to_ledger">Přidat</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <p>Všichni tví kontakty už jsou v tomto ledgeru.</p>
+                {% endif %}
+
             </tbody>
         </table>
     </div>
@@ -116,7 +139,7 @@
                             {% for balance in balances %}
                                 {% if balance.payment.id == payment.id %}
                                     <tr>
-                                        <td>{{ balance.person.username }}:</td>
+                                        <td>{{ balance.person.name }}:</td>
                                         <td>{{ balance.balance }}</td>
                                     </tr>
                                 {% endif %}
@@ -147,7 +170,7 @@
                     {% if user == payment.user%}
                         <form method='post'>
                             {% csrf_token %}
-                            <button type='submit' class='button-small custom-warning' name='payment-delete' value='{{ ledger.id }}'>
+                            <button type='submit' class='button-small custom-warning' name='payment-delete' value='{{ payment.id }}'>
                                 Delete this payment
                             </button>
                         </form>

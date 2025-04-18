@@ -3,6 +3,7 @@ from django.utils.timezone import now
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils.text import slugify
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 class AbstractBase(models.Model):
@@ -47,6 +48,31 @@ class UserPlaceholder(models.Model):
 
     def __str__(self):
          return f"{self.__class__.__name__} {self.name}, ID: {self.pk}"
+
+class ContactConnection(models.Model):
+    person_a = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='contact_relationships_a')
+    person_b = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='contact_relationships_b')
+    created_at = models.DateTimeField(auto_now_add=True)
+    explicit = models.BooleanField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['person_a', 'person_b'], name='unique_contact_connection')
+        ]
+
+    def clean(self):
+        # Zajistit, že person_a != person_b
+        if self.person_a == self.person_b:
+            raise ValidationError("Uživatel nemůže být ve spojení sám se sebou.")
+
+        # Zajistit, že vztah A↔B nebo B↔A ještě neexistuje
+        if ContactConnection.objects.filter(
+            person_a=self.person_b, person_b=self.person_a
+        ).exists():
+            raise ValidationError("Tato vazba už existuje v opačném směru.")
+
+    def __str__(self):
+        return f"{self.person_a} ↔ {self.person_b} ({'explicit' if self.explicit else 'implicit'})"
 
 # Ledger - an accounting book with all payments dedicated to same topic
 # meaning of user - is the creator and owner of the Ledger, can edit all entries in the ledger

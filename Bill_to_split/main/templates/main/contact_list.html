@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Moje kontakty</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Přidat kontakt</button>
+  </form>
+
+  <h3>Seznam kontaktů:</h3>
+  <ul>
+    {% for conn in connections %}
+      <li>
+        {% if conn.person_a == request.user.person %}
+          {{ conn.person_b }}
+        {% else %}
+          {{ conn.person_a }}
+        {% endif %}
+        {% if conn.explicit %}(explicit){% else %}(implicit){% endif %}
+      </li>
+    {% empty %}
+      <li>Nemáš žádné kontakty</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

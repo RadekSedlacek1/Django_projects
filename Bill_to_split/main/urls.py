@@ -26,6 +26,9 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
 # redirected to login in settings.py
 
+    path('contact_list/', views.contact_list, name='contact_list'),
+# redirected to contact list
+
 ##############################    Ledger related urls    ##############################
 
     path('list_of_ledgers/', views.list_of_ledgers, name='list_of_ledgers'),
