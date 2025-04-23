@@ -1,0 +1,68 @@
+Změna pro balance:
+Balance tedy musí mít ještě další atribut, který bude sledovat je-li daná platba schválena tím, kdo je u balance uveden jako dlužník. Pokud je dlužník zároveň plátce, má vzniknout jenom jedna notifikace. Pokud bude payment obsahovat nějakou balance, která zatím není schválená znamená to pro ledger, že celá payment prozatím není schválená a nebude se započítávat do zobrazované balance na template.
+
+
+Notifikace:
+
+Notifikace mají atributy:
+Typ                     - info / account_connection / ledger_connection / payment_approve
+Sender (Uživatel_A)     - foreign key na User
+Reciever (Uživatel_B)   - foreign key na User
+Čas vytvoření           - now když vytvořeno
+Čas změny               - now když změněn stav nevyplněn do uzměny stavu
+Stav                    - pendig / accepted / denied
+Message                 - Charfield 500 znaků
+ledger_ID               - může být prázdný, foreign key na ledger (pouze pokud typ je ledger_connection)
+balance_ID              - může být prázdný, foreign key na balance (pouze pokud typ je payment_approve)
+
+Typ:
+info                - Slouží pouze ke zpětné vazbě po změně stavu jiného typu notifikace
+account_connection  - Slouží k vytváření propojení mezi účty
+ledger_connection   - Slouží k přiřazení uživatele do ledgeru
+payment_approve     - Slouží k potvrzení platby
+
+Template:
+Musí vzniknout nový template pro zobrazení notifikací. Odkaz na tento template je v nav baru s ikonou obálky a číslem, které odpovídá počtu notifikací, které jsou pending pro přihlášeného uživatele jako _B
+Template má tři části:
+v první je seznam všech info kde je přihlášený uživatel _B a jsou pending. U nich je vždy tlačítko s nápisem "I read that" pro změnu stavu z pending na accepted.
+ve druhé části je seznam všech ostatních notifikací (vše mimo info) kde je přihlášený uživatel _B a jsou pending. U nich je tlačítko na s nápisem "open" kde vyskočí modální okno se všemi detaily a message a s prázdným textovám polem a dvěma tlačítky - "accept" a "denie" To slouží ke změně stavu této notifikace, provedení potřebného zápisu do databáze a odeslání info notifikace, kde přihlášený uživatel je _A a odesílatel původní notifikace je v info notifikaci _B a prázdné pole v modálním okně slouží k vyplnění message k této info notifikaci.
+Ve třetí části je seznam všech notifikací s časem jejich vytvoření - toto slouží jako log všech akcí uživatele chronologicky a nemá žádné ovládací prvky.
+
+Account_connection:
+Uživatel_A: Na svém přehledu kontaktů vyplní e-mail Uživatele_B a odešle se žádost - notifikace typu account_connection
+Do databáze se vytvoří záznam o notifikaci, který obsahuje:
+Uživatel_A, Uživatel_B, čas, typ notifikace (account_connection), stav (pending), text zadaný _A
+Uživatel _B má novou notifikaci ve stavu pending
+Pokud _B klikne na tuto obálku, dostane se na teplate se seznamem notifikací
+U této notifikace uvidí údaje: _A, _B, čas vytvoření, typ notifikace, stav, text zadaný _A
+Po kliknutí na tuto notifikaci vyskočí modální okno, kde jsou opět všechny informace notifikace a dále dvě tlačítka accept / denie a textové pole pro odpověď _A.
+Pokud accept:
+Změní stav této notifikace na accepted
+Dojde k vytvoření propojení mezi kontakty
+Odešle se notifikace typu (info) uživateli _A o přijetí propojení
+Pokud denie:
+Uživateli _B se změní stav této notifikace na denied
+Nedojde k vytvoření propojení mezi kontakty
+Odešle se notifikace typu (info) uživateli _A o odmítnutí propojení.
+
+Ledger_connection:
+Slouží k povolení / zamítnutí žádosti uživatele _A o připojení kontaktu _B do ledgeru (založením dummy platby a balance). Součástí notifikace je vazba na ledger, při pozdější zobrazení v template pro notifikace se v modálním okně zobrazí name a desc ledgeru.
+Pokud accepted:
+Změní stav této notifikace na accepted
+Dojde k vytvoření dummy platby
+Odešle se notifikace typu (info) uživateli _A o přijetí propojení
+Pokud denie:
+Uživateli _B se změní stav této notifikace na denied
+Nedojde k vytvoření dummy platby
+Odešle se notifikace typu (info) uživateli _A o odmítnutí propojení.
+
+Payment_approve:
+Slouží ke schválení / odmítnutí konkrétní balance. Tato notifikace vzniká při vytvoření platby a balance - instance pro každého kdo má nové balance a obsahuje odkaz na balance tohoto účastníka.
+Pokud accepted:
+Změní stav této notifikace na accepted
+Změní se stav balance připojené přes FK na accepted
+Odešle se notifikace typu (info) uživateli _A o potvrzení balance
+Pokud denie:
+Uživateli _B se změní stav této notifikace na denied
+Nedojde k vytvoření dummy platby
+Odešle se notifikace typu (info) uživateli _A o odmítnutí balance. Součástí této notifikace je link na edit template platby, na kterou má FK notifikace o této balance.
