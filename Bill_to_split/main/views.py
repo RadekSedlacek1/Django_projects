@@ -4,28 +4,173 @@ from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, permission_required
-from .models import Ledger, Payment, PaymentBalance, Person, UserPlaceholder, ContactConnection
-from .forms import UserRegisterForm, LedgerForm, PaymentForm, PaymentBalanceForm, AddContactForm
+from .models import Ledger, Payment, PaymentBalance, Person, UserPlaceholder, ContactConnection, Notification
+from .forms import UserRegisterForm, LedgerForm, PaymentForm, PaymentBalanceForm, AddContactForm, NotificationResponse
 from django.forms import inlineformset_factory
 from django.db.models import Q, Sum
 from collections import defaultdict
-
+import pprint
 
 ##############################        main views        ##############################
 
 def index(request):
-    return render(request, 'main/_index.html')
+    persons = Person.objects.all().distinct()
+    context = {'persons': persons}
+    return render(request, 'main/_index.html', context)
 
-@login_required(login_url='/login')     # if not loged in, redirect to: /login
-def home(request):
-    ledgers = Ledger.objects.all()
-    if request.method == 'POST':
-        ledger_id = request.POST.get('ledger-id')
-        if ledger_id:
-            ledger = Ledger.objects.filter(id=ledger_id).first()
-            if ledger and (ledger.author == request.user):
-                ledger.delete()
-    return render(request, 'main/home.html', {'ledgers':ledgers})
+@login_required(login_url='/login')
+def notifications(request):
+    person_self = get_object_or_404(Person, user=request.user)
+    notifications_all = Notification.objects.filter(
+    Q(recipient=person_self) | Q(sender=person_self)
+        ).order_by("-created_at")                       #All notofications with person_self.name in it
+    info_pending = notifications_all.filter(recipient=person_self, type="info", status="pending").order_by("-created_at")
+    account_connection_pending = notifications_all.filter(recipient=person_self, type="account_connection", status="pending").order_by("-created_at")
+    ledger_connection_pending = notifications_all.filter(recipient=person_self, type="ledger_connection", status="pending").order_by("-created_at")
+    balance_approve_pending = notifications_all.filter(recipient=person_self, type="balance_approve", status="pending").order_by("-created_at")
+    
+    if request.method == "POST":
+        notification_id = request.POST.get("notification_id")
+        action = request.POST.get("action")  # "accept" or "reject"
+        response_message = request.POST.get("response_message")
+        
+        if notification_id:
+
+            notification = get_object_or_404(Notification, id=notification_id, recipient=person_self)
+
+        # ("info", "Info"),
+        # ("account_connection", "Account Connection"),
+        # ("ledger_connection", "Ledger Connection"),
+        # ("balance_approve", "Balance Approve"),
+
+            if notification.type == "info" and notification.status == "pending":
+                # only action == "accept": possible
+                # Update the notification status
+                notification.status = "accepted"
+                notification.save()
+
+            if notification.type == "account_connection" and notification.status == "pending":
+                sender = notification.sender
+
+                if action == "accept":
+                    # Create contact connection
+                    ContactConnection.objects.create(
+                        person_a=person_self,
+                        person_b=sender,
+                        explicit=True
+                    )
+                    # Update the notification status
+                    notification.status = "accepted"
+                    notification.save()
+
+                    # Create new info notification for the sender
+                    Notification.objects.create(
+                        sender=person_self,
+                        recipient=sender,
+                        type="info",
+                        status="pending",
+                        message=response_message or f"The request for connection has been accepted by {person_self.name}",
+                    )
+                    messages.success(request, f"The request has been accepted and connection with {sender.name} created")
+
+                elif action == "reject":
+                    notification.status = "rejected"
+                    notification.save()
+
+                    Notification.objects.create(
+                        sender=person_self,
+                        recipient=sender,
+                        type="info",
+                        status="pending",
+                        message=response_message or f"The request for connection has been declined by {person_self.name}",
+                    )
+                    messages.info(request, f"The request from {sender.name} has been declined")
+
+            if notification.type == "ledger_connection" and notification.status == "pending":
+                person_self = notification.recipient
+                sender = notification.sender
+                ledger = notification.ledger
+
+                if action == "accept":
+                    # Dummy payment to connect new person to existing ledger
+                    with transaction.atomic():
+                        dummy_payment = Payment.objects.create(
+                            ledger=ledger,
+                            name=f"{person_self.name} added to the ledger",
+                            desc=f"Dummy payment to connect {person_self.name} with ledger",
+                            user=request.user,
+                            cost=0,
+                        )
+                    # Dummy Balance to connect new person to existing ledger
+                        PaymentBalance.objects.create(
+                            payment=dummy_payment,
+                            person=person_self,
+                            balance=0
+                        )
+
+                        # Change notification status
+                        notification.status = "accepted"
+                        notification.save()
+                        
+                        # Send a info notification back to sender
+                        Notification.objects.create(
+                            sender = person_self,
+                            recipient = sender,
+                            type = "info",
+                            status = "pending",
+                            message = response_message or f"{person_self.name} accepted your request to join '{ledger.name}'"
+                        )
+                        messages.success(request, f"{sender.name} has been added to ledger '{ledger.name}'")
+                
+                elif action == "reject":
+                    # Change notification status
+                    notification.status = "rejected"
+                    notification.save()
+                    
+                    Notification.objects.create(
+                        sender=person_self,
+                        recipient=sender,
+                        type="info",
+                        status="pending",
+                        message=response_message or f"{person_self.name} declined your request to join '{ledger.name}'"
+                    )
+                    messages.info(request, f"The request from {sender.name} has been rejected")
+                                                
+            
+            if notification.type == "balance_approve" and notification.status == "pending":
+                if action == "accept":
+                    pass
+                
+                elif action == "reject":
+                    pass
+
+        return redirect("notifications")
+
+    info_with_forms = []
+    for notification in info_pending:
+        info_with_forms.append((notification,NotificationResponse() ))
+    
+    account_connection_with_forms = []
+    for notification in account_connection_pending:
+        account_connection_with_forms.append((notification,NotificationResponse() ))
+        
+    ledger_connection_with_forms = []
+    for notification in ledger_connection_pending:
+        ledger_connection_with_forms.append((notification,NotificationResponse() ))
+        
+    balance_approve_with_forms = []
+    for notification in balance_approve_pending:
+        balance_approve_with_forms.append((notification,NotificationResponse() ))
+    
+    context = {
+        "notifications_all" : notifications_all,
+        "info_with_forms": info_with_forms,
+        "account_connection_with_forms": account_connection_with_forms,
+        "ledger_connection_with_forms": ledger_connection_with_forms,
+        "balance_approve_with_forms": balance_approve_with_forms,
+    }
+
+    return render(request, "main/notifications.html", context)
 
 ##############################  Account management views  ##############################
 
@@ -36,58 +181,73 @@ def sign_up(request):
             user = form.save()
             login(request, user)            # Create person entity as well
             Person.objects.create(user=user)
-            return redirect('/home')
+            return redirect('/overview')
     else:
         form = UserRegisterForm()
     return render(request, 'registration/sign_up.html', {'form': form})
 
 
-@login_required
-def contact_list(request):
-    person = get_object_or_404(Person, user=request.user)
+@login_required(login_url='/login')         # if not loged in, redirect to: /login
+def overview(request):
+    person_self = get_object_or_404(Person, user=request.user)
+    ledgers = Ledger.objects.filter(
+        Q(payment__paymentbalance__person=person_self)
+    ).distinct()
     form = AddContactForm()
 
     if request.method == "POST":
         form = AddContactForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
-
+            message_text = form.cleaned_data['message']
+            
             try:
                 other_user = User.objects.get(email=email)
                 other_person = Person.objects.get(user=other_user)
 
-                # Zkontroluj, zda spojení už neexistuje (obousměrně)
+                # Check if the connection already exists (both ways)
                 exists = ContactConnection.objects.filter(
-                    person_a=person, person_b=other_person
+                    person_a=person_self, person_b=other_person
                 ).exists() or ContactConnection.objects.filter(
-                    person_a=other_person, person_b=person
+                    person_a=other_person, person_b=person_self
                 ).exists()
 
+                # Check if the request already exists
                 if not exists:
-                    ContactConnection.objects.create(
-                        person_a=person,
-                        person_b=other_person,
-                        explicit=True
+                    already_sent = Notification.objects.filter(
+                        sender = person_self,
+                        recipient = other_person,
+                        type = "account_connection",
+                        status = "pending",
+                    ).exists()
+
+                    if not already_sent:
+                        Notification.objects.create(
+                            sender = person_self,
+                            recipient = other_person,
+                            type = "account_connection",
+                            status = "pending",
+                            message=message_text,
                     )
-                    messages.success(request, f"Kontakt s uživatelem {email} byl přidán.")
-                    return redirect('contact_list')
+
+                    messages.success(request, f"Request fo contact with user {email} has been sent.")
+                    return redirect('overview')
                 else:
-                    messages.info(request, "Tento kontakt už existuje.")
+                    messages.info(request, "You are already in contact with this user.")
             except User.DoesNotExist:
-                messages.error(request, f"Uživatel s e-mailem {email} neexistuje.")
-            except Person.DoesNotExist:
-                messages.error(request, f"Uživatel s e-mailem {email} nemá vytvořený Person profil.")
+                messages.error(request, f"User with e-mail: {email} does not exist.")
 
     connections = ContactConnection.objects.filter(
-        Q(person_a=person) | Q(person_b=person)
+        Q(person_a=person_self) | Q(person_b=person_self)
     )
 
     context = {
         'form': form,
         'connections': connections,
+        'ledgers':ledgers
     }
 
-    return render(request, 'main/contact_list.html', context)
+    return render(request, 'main/overview.html', context)
 
 
 
@@ -192,28 +352,35 @@ def ledger_detail(request, ledger_pk):
                             PaymentBalance.objects.filter(payment=payment).delete()
                             payment.delete()
                             
-        if 'add_person_to_ledger' in request.POST:
+        if 'request-ledger-connection' in request.POST:
             person_id = request.POST.get('person_to_add')
             person_to_add = get_object_or_404(Person, pk=person_id)
 
-            with transaction.atomic():
-                dummy_payment = Payment.objects.create(
+            # Does the same notification already exist?
+            existing = Notification.objects.filter(
+                sender=user_person,
+                recipient=person_to_add,
+                type="ledger_connection",
+                status="pending",
+                ledger=ledger
+            ).exists()
+
+            if not existing:
+                Notification.objects.create(
+                    sender=user_person,
+                    recipient=person_to_add,
+                    type="ledger_connection",
+                    status="pending",
+                    message=f"{user_person.name} is asking you to join ledger '{ledger.name}'",
                     ledger=ledger,
-                    name=f"{person_to_add.name} added to the ledger",
-                    desc=f"Dummy payment to connect {person_to_add.name} with ledger",
-                    user=request.user,
-                    cost=0,
                 )
+                messages.success(request, f"Request to join '{ledger.name}' sent to {person_to_add.name}")
+            else:
+                messages.info(request, f"A request is already pending for {person_to_add.name}")
 
-                PaymentBalance.objects.create(
-                    payment=dummy_payment,
-                    person=person_to_add,
-                    balance=0
-                )
 
-    # Pro přidání uživatele
-    
-    # Seznam osob propojených s uživatelem, ale zatím ne v ledgeru
+
+    # List of contacts, which are not in the ledger yet - people user can add
     connected_persons = ContactConnection.objects.filter(
         Q(person_a=user_person) | Q(person_b=user_person)
     )
@@ -228,8 +395,7 @@ def ledger_detail(request, ledger_pk):
     ).distinct()
 
     people_available_to_add = [p for p in related_people if p not in people_in_ledger]
-    
-    # pro přidání uživatele konec
+
 
     payments = Payment.objects.filter(ledger=ledger)
     balances = PaymentBalance.objects.filter(payment__in=payments).select_related('person')

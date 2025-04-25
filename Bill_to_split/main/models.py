@@ -105,3 +105,33 @@ class PaymentBalance(models.Model):
     balance = models.DecimalField(max_digits=10, decimal_places=2)
     def __str__(self):  
         return f"Payment balance, ID: {self.pk}, {self.payment.name}, {self.person.name}: {self.balance}"
+    
+# Notifications
+class Notification(models.Model):
+    NOTIF_TYPE_CHOICES = [
+        ("info", "Info"),
+        ("account_connection", "Account Connection"),
+        ("ledger_connection", "Ledger Connection"),
+        ("balance_approve", "Balance Approve"),
+    ]
+    
+    STATUS_CHOICES = [
+        ("pending","Pending"),
+        ("accepted","Accepted"),
+        ("rejected","Rejected"),
+        ("obsolete","Obsolete"),
+    ]
+
+    type = models.CharField(max_length=20, choices=NOTIF_TYPE_CHOICES)
+    sender = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="sent_notification")
+    recipient = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="received_notification")
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
+    updated_at = models.DateTimeField(auto_now=True)
+    message = models.CharField(max_length=500, blank=True)
+
+    ledger = models.ForeignKey(Ledger, on_delete=models.SET_NULL, null=True, blank=True)
+    balance = models.ForeignKey(PaymentBalance, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.type} from {self.sender} to {self.recipient} ({self.status})"

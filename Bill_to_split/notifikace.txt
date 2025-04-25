@@ -1,6 +1,6 @@
 Změna pro balance:
 Balance tedy musí mít ještě další atribut, který bude sledovat je-li daná platba schválena tím, kdo je u balance uveden jako dlužník. Pokud je dlužník zároveň plátce, má vzniknout jenom jedna notifikace. Pokud bude payment obsahovat nějakou balance, která zatím není schválená znamená to pro ledger, že celá payment prozatím není schválená a nebude se započítávat do zobrazované balance na template.
-
+Stav:                   - pendig (default) / accepted / denied
 
 Notifikace:
 
@@ -10,7 +10,7 @@ Sender (Uživatel_A)     - foreign key na User
 Reciever (Uživatel_B)   - foreign key na User
 Čas vytvoření           - now když vytvořeno
 Čas změny               - now když změněn stav nevyplněn do uzměny stavu
-Stav                    - pendig / accepted / denied
+Stav                    - pendig / accepted / denied / obsolete
 Message                 - Charfield 500 znaků
 ledger_ID               - může být prázdný, foreign key na ledger (pouze pokud typ je ledger_connection)
 balance_ID              - může být prázdný, foreign key na balance (pouze pokud typ je payment_approve)
@@ -64,5 +64,18 @@ Změní se stav balance připojené přes FK na accepted
 Odešle se notifikace typu (info) uživateli _A o potvrzení balance
 Pokud denie:
 Uživateli _B se změní stav této notifikace na denied
-Nedojde k vytvoření dummy platby
+Změní se stav balance připojené přes FK na denied
 Odešle se notifikace typu (info) uživateli _A o odmítnutí balance. Součástí této notifikace je link na edit template platby, na kterou má FK notifikace o této balance.
+
+Editace platby po (zamítnutí balance):
+V template pro editaci platby se načte původní payment s předvyplněnými hodnotami názvu, popisu, částky, plátce a balances pro jednotlivé osoby. 
+Uživatel _A může provést změny libovolné balance. Všechny nezměněné balances zůstávají ve svém původním stavu accepted.
+Jakmile uživatel změní částku u balance, tato balance se nastaví do stavu pending, a odešle se nová notifikace typu payment_approve danému uživateli (_B), jehož balance byla změněna.
+Původní balance se označí jako obsolete – záznam zůstává v databázi, ale nepočítá se do aktivních výpočtů.
+Nově vytvořená balance navazuje na původní payment (není vytvářena nová payment).
+Tento proces může probíhat iterativně:
+Jakmile jsou všechny balances v rámci platby ve stavu accepted, payment se považuje za platný a začíná se započítávat do výpočtů v rámci ledgeru.
+Pokud nelze dosáhnout konsenzu, může zadavatel platbu smazat. Tím:
+    Se stav všech balances k této platbě změní na obsolete.
+    Všem zúčastněným se odešle notifikace typu info s informací o zrušení platby, včetně důvodu zadaného v textovém poli.
+

@@ -12,8 +12,8 @@ urlpatterns = [
     path('welcome/', views.index, name='index'),
 # welcome page redirect after login
 
-    path('home/', views.home, name='home'),
-# user overview and stats
+    path('overview/', views.overview, name='overview'),
+# user account overview and stats
 
 ##############################  Account management urls  ##############################
 
@@ -26,8 +26,8 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
 # redirected to login in settings.py
 
-    path('contact_list/', views.contact_list, name='contact_list'),
-# redirected to contact list
+    path('notifications/', views.notifications, name='notifications'),
+# Go to notifications management
 
 ##############################    Ledger related urls    ##############################
 

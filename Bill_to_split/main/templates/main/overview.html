@@ -16,11 +16,37 @@
 
 {% block content %}
 
+
 <ul>
     <li>{{ user.username }} statistics</li>
     <li>Number of friends</li>
     <li>Number of {{ user.username }} ledgers and payments</li>
     <li>Total spendings by {{ user.username }}</li>
 </ul>
+
+
+<h3>Contact list:</h3>
+
+<ul>
+    {% for conn in connections %}
+    <li>
+        {% if conn.person_a == request.user.person %}
+            {{ conn.person_b.name }}
+        {% else %}
+            {{ conn.person_a.name }}
+        {% endif %}
+    </li>
+    {% empty %}
+        <li>You dont have any contacts yet, make any!</li>
+    {% endfor %}
+</ul>
+
+<h3>Find a new contact:</h3>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="primary">Send invitation</button>
+</form>
 
 {% endblock content %}

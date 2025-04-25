@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% comment %} user home overview for aplication main in project Bill_to_split {% endcomment %}
+
+{% load static %}
+
+{% block css_files %}    
+    <link rel="stylesheet" href="{% static 'main/styles/index.css' %}">
+{% endblock css_files %}
+
+{% block title %}Notifications
+{% endblock title %}
+
+{% block page_title %} Notifications of {{ user.username }}
+{% endblock page_title %}
+
+{% block content %}
+
+<h2>Oznámení</h2>
+
+{% for notification, form in info_with_forms %}
+    <div class="notification-pending">
+        <p><strong>From:</strong> {{ notification.sender.name }}</p>
+        <p>{{ notification.message }}</p>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="notification_id" value="{{ notification.id }}">
+            <button type="submit" name="action" value="accept">Ok</button>
+        </form>
+    </div>
+{% endfor %}
+
+{% for notification, form in account_connection_with_forms %}
+    <div class="notification-pending">
+        <p><strong>From:</strong> {{ notification.sender.name }}</p>
+        <p>{{ notification.message }}</p>
+
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="hidden" name="notification_id" value="{{ notification.id }}">
+            <button type="submit" name="action" value="accept">Accept</button>
+            <button type="submit" name="action" value="reject">Reject</button>
+        </form>
+    </div>
+{% endfor %}
+
+{% for notification, form in ledger_connection_with_forms %}
+    <div class="notification-pending">
+        <p>{{ notification.sender.name }} wants to add you to the ledger {{ notification.ledger.name }} </p>
+        <p>{{ notification.message }}</p>
+
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="hidden" name="notification_id" value="{{ notification.id }}">
+            <button type="submit" name="action" value="accept">Accept</button>
+            <button type="submit" name="action" value="reject">Reject</button>
+        </form>
+    </div>
+{% endfor %}
+
+{% for notification, form in balance_approve_with_forms %}
+    <div class="notification-pending">
+        <p><strong>From:</strong> {{ notification.sender.name }}</p>
+        <p>{{ notification.message }}</p>
+
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="hidden" name="notification_id" value="{{ notification.id }}">
+            <button type="submit" name="action" value="accept">Accept</button>
+            <button type="submit" name="action" value="reject">Reject</button>
+        </form>
+    </div>
+{% endfor %}
+
+
+{% for notification in notifications_all %}
+    <div class="notification-box">
+        <ul>
+            from:
+            {{ notification.sender.user.username }}
+            type:
+            {{ notification.type }}
+            {{ notification.status }}
+            created: 
+            {{ notification.created_at }}
+
+        </ul>
+
+{% empty %}
+
+<p>No notifications yet at all.</p>
+      
+{% endfor %}
+
+{% endblock content %}

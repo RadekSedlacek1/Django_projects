@@ -69,32 +69,46 @@
             {% if user.is_authenticated %}
 
             <li class="">
-                <form method="post" action="{% url 'home' %}">
+                <form method="post" action="{% url 'overview' %}">
                     {% csrf_token %}
                     <button type="submit" class='button-small'>My overview</button>
                 </form>
             </li>
 
             <li class="">
+                <form method="post" action="{% url 'notifications' %}">
+                    {% csrf_token %}
+                    <button type="submit" class='button-small'>Notifications</button>
+                </form>
+            </li>
+
+            <li class="">
                 <form method="post" action="{% url 'list_of_ledgers' %}">
                     {% csrf_token %}
-                    <button type="submit" class='button-small'>Ledgers</button>
+                    <button type="submit" class='button-small'>My ledgers</button>
                 </form>
             </li>
 
             {% else %}
 
             <li class="">
-                <form method="post" action="{% url 'home' %}">
+                <form method="post" action="{% url 'overview' %}">
                     {% csrf_token %}
                     <button type="submit" class='button-small outline'>My overview</button>
                 </form>
             </li>
 
             <li class="">
+                <form method="post" action="{% url 'notifications' %}">
+                    {% csrf_token %}
+                    <button type="submit" class='button-small outline'>Notifications</button>
+                </form>
+            </li>
+
+            <li class="">
                 <form method="post" action="{% url 'list_of_ledgers' %}">
                     {% csrf_token %}
-                    <button type="submit" class='button-small outline'>Ledgers</button>
+                    <button type="submit" class='button-small outline'>My ledgers</button>
                 </form>
             </li>
 

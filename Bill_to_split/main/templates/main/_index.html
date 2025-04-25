@@ -23,4 +23,15 @@
         <li>Total spendings evaluated on this app</li>
     </ul>
 
+    <h3>for debug only:</h3>
+    {% for person in persons %}
+        <ul>
+
+        {{ person.name }} - {{ person.user.email }}
+
+        </ul>   
+        {% empty %}
+            <li>There are no users yet</li>
+        {% endfor %}
+
 {% endblock content %}
