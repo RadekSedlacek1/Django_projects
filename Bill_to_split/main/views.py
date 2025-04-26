@@ -101,13 +101,13 @@ def notifications(request):
                             user=request.user,
                             cost=0,
                         )
-                    # Dummy Balance to connect new person to existing ledger
+                        # Dummy Balance to connect new person to existing ledger
                         PaymentBalance.objects.create(
                             payment=dummy_payment,
                             person=person_self,
                             balance=0
                         )
-
+                        
                         # Change notification status
                         notification.status = "accepted"
                         notification.save()
@@ -131,18 +131,67 @@ def notifications(request):
                         sender=person_self,
                         recipient=sender,
                         type="info",
-                        status="pending",
+                        status="rejected",
                         message=response_message or f"{person_self.name} declined your request to join '{ledger.name}'"
                     )
                     messages.info(request, f"The request from {sender.name} has been rejected")
                                                 
             
             if notification.type == "balance_approve" and notification.status == "pending":
+                payment = notification.balance.payment
+                person_self = notification.recipient
+                sender = notification.sender
                 if action == "accept":
-                    pass
-                
+                    
+                    with transaction.atomic():
+                        # Notification status change
+                        notification.status = "accepted"
+                        notification.save()
+                        
+                        # Payment status change?
+                        non_accepted_notifications = Notification.objects.filter(
+                            balance__payment = payment
+                            ).exclude(status="accepted")
+                        
+                        # Info message if payment still pending
+                        if non_accepted_notifications.exists():
+                            Notification.objects.create(
+                                sender = person_self,
+                                recipient = sender,
+                                type = "info",
+                                status = "pending",
+                                message = response_message or f"{person_self.name} accepted his/her share in payment {payment.name}"
+                            )
+                            messages.success(request, f"{sender.name} accepted his/her share in payment {payment.name}")
+                            
+                        # Info message if all accepted, payment status change
+                        else:
+                            payment.status = 'accepted'
+                            payment.save()
+                            
+                            Notification.objects.create(
+                                sender = person_self,
+                                recipient = sender,
+                                type = "info",
+                                status = "pending",
+                                message = response_message or f"The payment {payment.name} has been accepted by all involved users, last accepting is {person_self.name}."
+                            )
+                            messages.success(request, f"The payment {payment.name} has been accepted by all involved users, last accepting is {person_self.name}.")
+                        
                 elif action == "reject":
-                    pass
+                    with transaction.atomic():
+                        # Notification status change
+                        notification.status = "rejected"
+                        notification.save()
+
+                        Notification.objects.create(
+                            sender = person_self,
+                            recipient = sender,
+                            type = "info",
+                            status = "pending",
+                            message = response_message or f"{person_self.name} rejected his/her share in payment {payment.name}"
+                        )
+                        messages.success(request, f"{sender.name} rejected his/her share in payment {payment.name}")
 
         return redirect("notifications")
 
@@ -378,8 +427,6 @@ def ledger_detail(request, ledger_pk):
             else:
                 messages.info(request, f"A request is already pending for {person_to_add.name}")
 
-
-
     # List of contacts, which are not in the ledger yet - people user can add
     connected_persons = ContactConnection.objects.filter(
         Q(person_a=user_person) | Q(person_b=user_person)
@@ -408,6 +455,20 @@ def ledger_detail(request, ledger_pk):
 
     # převod do seznamu slovníků pro template
     user_balances_list = [{'person': p, 'name': p.name, 'balance': total} for p, total in user_balances.items()]
+
+    # Balance for each payment of the loged user:
+    for payment in payments:
+        user_balance = PaymentBalance.objects.filter(payment=payment, person=request.user.person).first()
+        if user_balance:
+            payment.user_balance = user_balance.balance
+        else:
+            payment.user_balance = None
+
+    # Status for each balance:
+    for balance in balances:
+        notification = Notification.objects.filter(balance=balance).first()
+        if notification:
+            balance.status = notification.status
 
     return render(request, 'main/ledger_detail.html', {
         'ledger': ledger,
@@ -501,12 +562,34 @@ def payment_add(request, ledger_pk):
                 # 6. Ukládáme jednotlivé balances do databáze
                 for person, balance in balances_to_create:
                     if balance != 0:  # Neuložíme balance, která je 0
-                        PaymentBalance.objects.create(
+                        payment_balance = PaymentBalance.objects.create(
                             person=person,
                             payment=payment,
-                            balance=balance
+                            balance=balance,
                         )
                         print(f"Balance {balance} uložena pro {person.name}")
+                        
+                        # 7. Notifikace 
+                        status = "pending"
+                        sender = payment.user.person
+                        recipient = person
+                        
+                        # Accepted automaticaly the paying part for the payer => only 1 nottification
+                        if balance > 0:
+                            status = "accepted"
+                        
+                        # Payment creator accepts the notification
+                        if sender is recipient:
+                            status = "accepted"
+
+                        Notification.objects.create(
+                            type = "balance_approve",
+                            sender = sender,
+                            recipient = recipient,
+                            status = status,
+                            message = f"Approve your balance of {payment_balance.balance} for payment {payment.name}",
+                            balance = payment_balance,
+                        )
 
         else:
             print("Formulář není validní nebo plátce není určen.")

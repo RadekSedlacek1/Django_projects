@@ -45,10 +45,10 @@ urlpatterns = [
 
 ##############################    Payment related urls    ##############################
 
-    path('payment_add/<int:ledger_pk>', views.payment_add, name='payment_add'),
+    path('payment_add/<int:ledger_pk>/', views.payment_add, name='payment_add'),
 # create a new payment
 
-    path('payment_edit/<int:payment_pk>', views.payment_edit, name='payment_edit'),
+    path('payment_edit/<int:payment_pk>/', views.payment_edit, name='payment_edit'),
 # edit name and desc of the payment and payment + or - balance increment for users of this payment
 ]
 

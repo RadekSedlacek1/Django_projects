@@ -87,11 +87,20 @@ class Ledger(AbstractBase):
 # meaning of user - is the owner of the entry, can edit it
 # Payment is always created by real loged user, never by UserPlaceholder
 class Payment(AbstractBase):
+    
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('declined', 'Declined'),
+    )
+    
     user = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name ="Payment creator")
     ledger = models.ForeignKey(Ledger, on_delete=models.PROTECT)
     entry_time = models.DateTimeField(default=now, verbose_name ="Time of this entry")
     payment_time = models.DateTimeField(default=now, verbose_name ="Time of payment")
     cost = models.DecimalField(max_digits=10, decimal_places=2, verbose_name ="Total cost of the payment")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    
     def get_absolute_url(self):
         return reverse('main:PaymentDetailView', kwargs={'pk': self.pk, 'slug': self.slug})
     
