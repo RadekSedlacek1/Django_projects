@@ -393,6 +393,11 @@ def ledger_detail(request, ledger_pk):
             if ledger_id:                                                   # do the rest only if you have id to go to
                 return redirect('payment_add', ledger_pk=ledger_id)
 
+        if 'payment-edit' in request.POST:
+            payment_id = request.POST.get('payment-edit')
+            if payment_id:
+                return redirect('payment_edit', payment_pk = payment_id)
+
         if 'payment-delete' in request.POST:
             payment_id = request.POST.get('payment-delete')                     # take the id form the template
             if payment_id:                                                   # do the rest only if you have id to go to
@@ -615,5 +620,122 @@ def payment_add(request, ledger_pk):
         })
 
 @login_required(login_url='/login')
-def payment_edit(request):
-    return render(request, 'main/payment_edit.html', {})
+def payment_edit(request, payment_pk):
+    payment = get_object_or_404(Payment, pk=payment_pk)
+    ledger = payment.ledger
+
+    # Načteme účastníky, aby plátce byl na prvním místě
+    balances = PaymentBalance.objects.filter(payment=payment)
+    participants = list(Person.objects.filter(paymentbalance__payment__ledger=ledger).distinct())
+    participants = [request.user.person] + [p for p in participants if p != request.user.person]
+
+    # Předvyplníme formulář a hodnoty z databáze
+    form = PaymentForm(request.POST or None, instance=payment)
+
+    if request.method == 'POST':
+        participant_values = []
+        payer_person = None
+
+        for person in participants:
+            balance_raw = request.POST.get(f"balance_{person.id}", "")
+            balance = balance_raw.strip() if balance_raw else ""
+            if balance != "":
+                participant_values.append({
+                    "person": person,
+                    "balance": float(balance),
+                })
+
+            if request.POST.get("payer") == str(person.id):
+                payer_person = person
+
+        if form.is_valid() and payer_person:
+            cost = round(float(request.POST.get("cost", 0)), 2)
+            total_balance = 0
+
+            balances_to_create = []
+            if payer_person:
+                balances_to_create.append((payer_person, cost))
+                total_balance += cost
+
+            for item in participant_values:
+                person = item["person"]
+                balance = item["balance"]
+                balances_to_create.append((person, balance))
+                total_balance += balance
+
+            if round(total_balance, 2) != 0:
+                return render(request, 'main/payment_add.html', {
+                    'form': form,
+                    'ledger': ledger,
+                    'participant_values': participant_values,
+                    'error': 'Součet balance (platba + dluhy) není nulový.',
+                    'edit': True,
+                    'payment': payment,
+                })
+
+            with transaction.atomic():
+                payment = form.save(commit=False)
+                payment.user = request.user
+                payment.ledger = ledger
+                payment.cost = cost
+                payment.save()
+
+                # Smažeme původní balances a notifikace
+                PaymentBalance.objects.filter(payment=payment).delete()
+                Notification.objects.filter(balance__payment=payment).delete()
+
+                for person, balance in balances_to_create:
+                    if balance != 0:
+                        payment_balance = PaymentBalance.objects.create(
+                            person=person,
+                            payment=payment,
+                            balance=balance,
+                        )
+                        status = "pending"
+                        sender = payment.user.person
+                        recipient = person
+                        if balance > 0 or sender == recipient:
+                            status = "accepted"
+                        Notification.objects.create(
+                            type="balance_approve",
+                            sender=sender,
+                            recipient=recipient,
+                            status=status,
+                            message=f"Approve your balance of {payment_balance.balance} for payment {payment.name}",
+                            balance=payment_balance,
+                        )
+
+            return redirect('ledger_detail', ledger_pk=ledger.pk)
+
+        else:
+            return render(request, 'main/payment_add.html', {
+                'form': form,
+                'ledger': ledger,
+                'participant_values': participant_values,
+                'error': 'Formulář obsahuje chyby nebo plátce není vybrán.',
+                'edit': True,
+                'payment': payment,
+            })
+
+    else:
+        # Předvyplněné hodnoty pro GET
+        participant_values = []
+        payer_id = None
+        for person in participants:
+            balance = balances.filter(person=person).first()
+            balance_value = balance.balance if balance else ""
+            if balance and balance.balance > 0:
+                payer_id = person.id
+            participant_values.append({
+                "person": person,
+                "balance": balance_value,
+            })
+
+        return render(request, 'main/payment_add.html', {
+            'form': form,
+            'ledger': ledger,
+            'participant_values': participant_values,
+            'payer_id': payer_id,
+            'edit': True,
+            'payment': payment,
+        })
